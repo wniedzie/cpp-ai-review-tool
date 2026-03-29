@@ -1,0 +1,25 @@
+---
+description: "Use when writing or modifying C++ source files (.cpp, .cxx, .cc). Covers implementation patterns, functional style, views usage, and RAII."
+applyTo: "**/*.cpp,**/*.cxx,**/*.cc"
+---
+# C++ Source File Guidelines
+
+## Implementation Style
+
+- Prefer `std::views` pipelines and `std::ranges` algorithms over manual loops.
+- Write pure functions by default — take `const` inputs, return results, avoid side effects.
+- Use `std::expected<T, E>` for functions that can fail; chain with `.and_then()` / `.transform()`.
+- Use lambdas for local behavior; prefer generic lambdas (`auto` params) when the body is generic.
+- Use `constexpr` / `consteval` on any function that can be evaluated at compile time.
+
+## Resource & Lifetime
+
+- Never use naked `new` / `delete`. Use smart pointers or RAII wrappers.
+- Acquire resources in constructors, release in destructors.
+- Pass non-owning access as `const T&`, `T&`, or `std::span<T>`.
+
+## Error Handling
+
+- Return `std::expected<T, E>` for recoverable errors.
+- Use `std::optional<T>` when a value may legitimately be absent.
+- Throw exceptions only for truly unrecoverable errors.
