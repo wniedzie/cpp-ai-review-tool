@@ -99,6 +99,6 @@ Apply design patterns where they solve a real problem. Prefer modern C++ idioms:
 ## Code Organization
 
 - One class/module per header-source pair.
-- Use traditional `#ifndef` / `#define` / `#endif` include guards (not `#pragma once`). Guard name: `PROJECT_PATH_FILENAME_HPP`.
+- Use traditional `#ifndef` / `#define` / `#endif` include guards (not `#pragma once`) and follow the single, non-reserved include-guard naming convention defined in `.github/instructions/cpp-header.instructions.md`.
 - Prefer forward declarations to reduce header coupling.
 - Group includes: standard library → third-party → project headers, separated by blank lines.
