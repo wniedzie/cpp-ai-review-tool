@@ -7,7 +7,7 @@ applyTo: "**/*.hpp,**/*.h,**/*.hxx"
 
 ## Structure
 
-- Use traditional `#ifndef` / `#define` / `#endif` include guards (not `#pragma once`). Guard name format: `__PROJECT_PATH_FILENAME_HPP__`.
+- Use traditional `#ifndef` / `#define` / `#endif` include guards (not `#pragma once`). Guard name format: `PROJECT_PATH_FILENAME_HPP`.
 - Order includes: standard library → third-party → project headers, separated by blank lines.
 - Minimize includes — prefer forward declarations to reduce coupling.
 
