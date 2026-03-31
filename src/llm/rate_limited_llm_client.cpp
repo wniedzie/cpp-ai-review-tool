@@ -1,8 +1,8 @@
 #include "llm/rate_limited_llm_client.hpp"
 
 #include <algorithm>
+#include <cassert>
 #include <mutex>
-#include <stdexcept>
 #include <thread>
 
 namespace llm {
@@ -14,12 +14,9 @@ RateLimitedLlmClient::RateLimitedLlmClient(
     , m_config{config}
     , m_available_tokens{config.burst_capacity}
     , m_last_refill{std::chrono::steady_clock::now()} {
-    if (!(config.tokens_per_second > 0.0)) {
-        throw std::invalid_argument{"TokenBucketConfig: tokens_per_second must be > 0"};
-    }
-    if (!(config.burst_capacity >= 1.0)) {
-        throw std::invalid_argument{"TokenBucketConfig: burst_capacity must be >= 1"};
-    }
+    assert(m_inner != nullptr);
+    assert(config.tokens_per_second > 0.0);
+    assert(config.burst_capacity >= 1.0);
 }
 
 std::expected<LlmResponse, LlmError> RateLimitedLlmClient::complete(const LlmRequest& request) {
