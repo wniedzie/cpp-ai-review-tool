@@ -14,6 +14,6 @@ struct LlmRequest {
     std::optional<std::uint32_t> max_tokens;  // nullopt → model default
 };
 
-} // namespace llm
+}  // namespace llm
 
-#endif // CPP_REVIEW_LLM_LLM_REQUEST_HPP
+#endif  // CPP_REVIEW_LLM_LLM_REQUEST_HPP

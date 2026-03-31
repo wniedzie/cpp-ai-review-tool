@@ -14,13 +14,13 @@ class LlmClient {
 public:
     virtual ~LlmClient() = default;
 
-    [[nodiscard]] virtual std::expected<LlmResponse, LlmError>
-    complete(const LlmRequest& request) = 0;
+    [[nodiscard]] virtual std::expected<LlmResponse, LlmError> complete(const LlmRequest& request
+    ) = 0;
 
-    LlmClient(const LlmClient&)             = delete;
-    LlmClient& operator=(const LlmClient&)  = delete;
-    LlmClient(LlmClient&&) noexcept         = default;  // needed so derived classes stay movable
-    LlmClient& operator=(LlmClient&&)       = delete;
+    LlmClient(const LlmClient&)            = delete;
+    LlmClient& operator=(const LlmClient&) = delete;
+    LlmClient(LlmClient&&) noexcept        = default;  // needed so derived classes stay movable
+    LlmClient& operator=(LlmClient&&)      = delete;
 
 protected:
     LlmClient() = default;
@@ -29,9 +29,11 @@ protected:
 // Supplemental concept — constrains templates without coupling to the ABC.
 template <typename T>
 concept LlmClientLike = requires(T& client, const LlmRequest& req) {
-    { client.complete(req) } -> std::same_as<std::expected<LlmResponse, LlmError>>;
-};
+                            {
+                                client.complete(req)
+                                } -> std::same_as<std::expected<LlmResponse, LlmError>>;
+                        };
 
-} // namespace llm
+}  // namespace llm
 
-#endif // CPP_REVIEW_LLM_LLM_CLIENT_HPP
+#endif  // CPP_REVIEW_LLM_LLM_CLIENT_HPP

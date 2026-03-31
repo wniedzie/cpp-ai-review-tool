@@ -15,27 +15,19 @@ endif()
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(FetchContent)
 
-# ── Standalone Asio ─────────────────────────────────────────────────────────
-# Prefer the system package (libasio-dev) when available.
-# If not installed, FetchContent falls back to a git clone.
-find_path(ASIO_INCLUDE_DIR asio.hpp
-    PATHS /usr/include /usr/local/include
+# ── cpp-httplib (header-only HTTPS client, uses OpenSSL) ──────────────────────
+FetchContent_Declare(
+    httplib
+    GIT_REPOSITORY https://github.com/yhirose/cpp-httplib.git
+    GIT_TAG        v0.18.7
+    GIT_SHALLOW    TRUE
 )
-if(ASIO_INCLUDE_DIR)
-    message(STATUS "Using system Asio at ${ASIO_INCLUDE_DIR}")
-else()
-    FetchContent_Declare(
-        asio
-        GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
-        GIT_TAG        asio-1-38-0
-        GIT_SHALLOW    TRUE
-    )
-    FetchContent_MakeAvailable(asio)
-    set(ASIO_INCLUDE_DIR "${asio_SOURCE_DIR}/asio/include")
-endif()
+set(HTTPLIB_REQUIRE_OPENSSL ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(httplib)
 
 # ── nlohmann/json ─────────────────────────────────────────────────────────────
 # Prefer the system package (nlohmann-json3-dev) when available.
@@ -50,10 +42,10 @@ if(NOT nlohmann_json_FOUND)
     FetchContent_MakeAvailable(nlohmann_json)
 endif()
 
-# ── OpenSSL (required for Asio SSL/TLS support) ───────────────────────────────
+# ── OpenSSL (required for cpp-httplib HTTPS support) ──────────────────────────
 find_package(OpenSSL REQUIRED)
 
-# ── Threads (required by Asio on Linux / macOS) ───────────────────────────────
+# ── Threads ───────────────────────────────────────────────────────────────────
 find_package(Threads REQUIRED)
 
 # ── GTest / GMock ─────────────────────────────────────────────────────────────
@@ -76,19 +68,9 @@ target_include_directories(cpp_review_lib PUBLIC
     ${CMAKE_SOURCE_DIR}/include
 )
 
-# Expose Asio headers as SYSTEM to suppress third-party warnings
-target_include_directories(cpp_review_lib SYSTEM PRIVATE
-    ${ASIO_INCLUDE_DIR}
-)
-
-target_compile_definitions(cpp_review_lib PRIVATE
-    ASIO_STANDALONE
-    ASIO_NO_DEPRECATED
-)
-
 target_link_libraries(cpp_review_lib PRIVATE
-    OpenSSL::SSL
-    OpenSSL::Crypto
+httplib
+    httplib::httplib
     Threads::Threads
     nlohmann_json::nlohmann_json
 )
