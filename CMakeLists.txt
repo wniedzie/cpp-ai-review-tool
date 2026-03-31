@@ -81,5 +81,6 @@ add_executable(cpp-review src/main.cpp)
 target_link_libraries(cpp-review PRIVATE cpp_review_lib)
 
 # ── Tests ─────────────────────────────────────────────────────────────────────
+include(GoogleTest)
 enable_testing()
-# add_subdirectory(tests)  # uncomment when tests/ is added
+add_subdirectory(tests)
