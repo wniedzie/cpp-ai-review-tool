@@ -119,13 +119,15 @@ ClaudeLlmClient::ClaudeLlmClient(
     , m_http_client{std::move(http_client)} {}
 
 std::expected<LlmResponse, LlmError> ClaudeLlmClient::complete(const LlmRequest& request) {
-    const auto effective_model = request.model.value_or(m_model);
-    const auto body            = build_request_body(request, effective_model);
+    const std::string& effective_model = request.model.has_value() ? *request.model : m_model;
+    const auto         body            = build_request_body(request, effective_model);
     return send_request(*m_http_client, body, m_api_key);
 }
 
 // ─── Factory ─────────────────────────────────────────────────────────────────
 
+// Returns AuthFailure if ANTHROPIC_API_KEY is missing, empty, or contains
+// characters outside the allowed set (alphanumeric, hyphens, underscores).
 std::expected<ClaudeLlmClient, LlmError> make_claude_client() {
     const auto* const api_key_env = std::getenv("ANTHROPIC_API_KEY");
     if (api_key_env == nullptr || std::string_view{api_key_env}.empty()) {
