@@ -6,8 +6,8 @@ C++23 tool for AI assisted review
 - C++23-capable compiler (GCC 13+, Clang 16+)
 - CMake 3.22+
 - OpenSSL (`libssl-dev` on Debian/Ubuntu)
-- Asio (`libasio-dev` on Debian/Ubuntu; fetched via CMake if not found)
 - nlohmann/json (`nlohmann-json3-dev` on Debian/Ubuntu; fetched via CMake if not found)
+- cpp-httplib, googletest — fetched automatically by CMake
 
 ## Build
 
@@ -21,6 +21,8 @@ cmake --build build
 
 ```
 .
+├── .clang-format
+├── .clangd
 ├── CMakeLists.txt
 ├── include/
 │   └── llm/
