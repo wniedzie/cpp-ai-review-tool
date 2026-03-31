@@ -25,7 +25,7 @@ public:
 private:
     std::string                  m_api_key;
     std::string                  m_model;
-    std::unique_ptr<IHttpClient> m_http_client;
+    std::unique_ptr<IHttpClient> m_http_client{nullptr};
 };
 
 // Factory — reads ANTHROPIC_API_KEY and CPP_REVIEW_MODEL environment variables.
