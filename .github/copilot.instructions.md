@@ -91,7 +91,7 @@ Apply design patterns where they solve a real problem. Prefer modern C++ idioms:
 
 - **Types** (classes, structs, concepts, enums, aliases): `PascalCase`
 - **Functions, methods, variables, parameters**: `snake_case`
-- **Constants, enum values**: `k_snake_case` or `UPPER_SNAKE_CASE`
+- **Constants, enum values**: `snake_case` (descriptive name, no prefix) or `UPPER_SNAKE_CASE`
 - **Template parameters**: `PascalCase` (e.g., `typename Value`, `typename Predicate`)
 - **Namespaces**: `lower_snake_case`
 - **File names**: `snake_case.hpp`, `snake_case.cpp`
