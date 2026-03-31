@@ -38,13 +38,14 @@ std::expected<LlmResponse, LlmError> RateLimitedLlmClient::complete(const LlmReq
 
         // Each API call costs one token; compute wait time while holding the lock
         // so concurrent callers each account for their own reservation.
+        // Always decrement (possibly into negative) to reserve the token before
+        // releasing the lock — this prevents multiple threads from computing the
+        // same wait and all proceeding simultaneously.
         if (m_available_tokens < 1.0) {
             wait_duration = std::chrono::duration<double>{
                 (1.0 - m_available_tokens) / m_config.tokens_per_second};
-            m_available_tokens = 0.0;
-        } else {
-            m_available_tokens -= 1.0;
         }
+        m_available_tokens -= 1.0;
     }
 
     if (wait_duration > std::chrono::duration<double>::zero()) {
