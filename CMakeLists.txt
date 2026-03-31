@@ -70,7 +70,6 @@ target_include_directories(cpp_review_lib PUBLIC
 )
 
 target_link_libraries(cpp_review_lib PRIVATE
-httplib
     httplib::httplib
     Threads::Threads
     nlohmann_json::nlohmann_json
