@@ -1,0 +1,80 @@
+---
+Language: Cpp
+Standard: Latest
+BasedOnStyle: LLVM
+
+# ── Indentation ──────────────────────────────────────────────────────────────
+IndentWidth: 4
+ContinuationIndentWidth: 4
+ConstructorInitializerIndentWidth: 4
+IndentCaseLabels: true
+NamespaceIndentation: None
+IndentPPDirectives: None
+AccessModifierOffset: -4
+
+# ── Column limit ─────────────────────────────────────────────────────────────
+ColumnLimit: 100
+
+# ── Braces ───────────────────────────────────────────────────────────────────
+BreakBeforeBraces: Attach
+
+# ── Packing / wrapping ──────────────────────────────────────────────────────
+BinPackArguments: false
+BinPackParameters: false
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowAllArgumentsOnNextLine: true
+
+# ── Short forms ──────────────────────────────────────────────────────────────
+AllowShortBlocksOnASingleLine: Empty
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine: All
+AllowShortLoopsOnASingleLine: false
+
+# ── Constructors ─────────────────────────────────────────────────────────────
+BreakConstructorInitializers: BeforeComma
+PackConstructorInitializers: Never
+
+# ── Pointer / reference ─────────────────────────────────────────────────────
+DerivePointerAlignment: false
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+# ── Alignment ────────────────────────────────────────────────────────────────
+AlignAfterOpenBracket: BlockIndent
+AlignConsecutiveAssignments: Consecutive
+AlignConsecutiveDeclarations: Consecutive
+AlignOperands: Align
+AlignTrailingComments: true
+
+# ── Includes ─────────────────────────────────────────────────────────────────
+SortIncludes: CaseInsensitive
+IncludeBlocks: Regroup
+IncludeCategories:
+  # Standard library: angle brackets, no dots or slashes (e.g. <string>, <cstdint>)
+  - Regex: '^<[a-z_]+>$'
+    Priority: 1
+    SortPriority: 1
+  # Third-party: angle brackets with path or extension (e.g. <asio.hpp>, <nlohmann/json.hpp>)
+  - Regex: '^<.+>$'
+    Priority: 2
+    SortPriority: 2
+  # Project headers: quoted (e.g. "llm/llm_client.hpp")
+  - Regex: '^".*"$'
+    Priority: 3
+    SortPriority: 3
+IncludeIsMainRegex: '([-_](test|unittest))?$'
+
+# ── Spaces ───────────────────────────────────────────────────────────────────
+SpaceBeforeParens: ControlStatements
+SpaceAfterCStyleCast: false
+SpaceAfterLogicalNot: false
+SpaceBeforeAssignmentOperators: true
+SpacesBeforeTrailingComments: 2
+
+# ── Misc ─────────────────────────────────────────────────────────────────────
+FixNamespaceComments: true
+ReflowComments: true
+InsertBraces: false
+...
