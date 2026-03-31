@@ -58,6 +58,17 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+# ── clang-tidy (optional static analysis) ─────────────────────────────────────
+option(ENABLE_CLANG_TIDY "Enable clang-tidy static analysis during build" OFF)
+if(ENABLE_CLANG_TIDY)
+    # clang-tidy < 16 does not recognise -std=c++23; require 16+.
+    find_program(CLANG_TIDY_EXE
+        NAMES clang-tidy-18 clang-tidy-17 clang-tidy-16
+        REQUIRED
+    )
+    set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE}")
+endif()
+
 # ── Core library ──────────────────────────────────────────────────────────────
 add_library(cpp_review_lib STATIC
     src/llm/rate_limited_llm_client.cpp
