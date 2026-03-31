@@ -15,7 +15,7 @@ namespace llm {
 namespace {
 
 constexpr std::string_view     default_model      = "claude-sonnet-4-6";
-constexpr auto                 api_host           = "https://api.anthropic.com";
+constexpr auto                 api_host           = "api.anthropic.com";
 constexpr std::string_view     api_path           = "/v1/messages";
 constexpr std::string_view     api_version        = "2023-06-01";
 constexpr std::uint32_t        default_max_tokens = 4096;
@@ -80,7 +80,7 @@ constexpr std::chrono::seconds request_timeout{30};
 
 [[nodiscard]] std::expected<LlmResponse, LlmError>
 send_request(const std::string& body, const std::string& api_key) {
-    httplib::SSLClient client{api_host};
+    httplib::SSLClient client{api_host, 443};
     client.set_read_timeout(request_timeout);
     client.set_connection_timeout(request_timeout);
     client.enable_server_certificate_verification(true);
