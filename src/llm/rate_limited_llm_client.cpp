@@ -29,7 +29,7 @@ std::expected<LlmResponse, LlmError> RateLimitedLlmClient::complete(const LlmReq
         const auto elapsed = std::chrono::duration<double>(now - m_last_refill).count();
 
         m_available_tokens = std::min(
-            m_config.burst_capacity, m_available_tokens + elapsed * m_config.tokens_per_second
+            m_config.burst_capacity, m_available_tokens + (elapsed * m_config.tokens_per_second)
         );
         m_last_refill = now;
 

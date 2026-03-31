@@ -1,11 +1,12 @@
 #ifndef CPP_REVIEW_LLM_LLM_ERROR_HPP
 #define CPP_REVIEW_LLM_LLM_ERROR_HPP
 
+#include <cstdint>
 #include <string_view>
 
 namespace llm {
 
-enum class LlmError {
+enum class LlmError : std::uint8_t {
     AuthFailure,       // invalid or missing ANTHROPIC_API_KEY
     RateLimited,       // HTTP 429 from API
     NetworkError,      // connection failure or timeout
