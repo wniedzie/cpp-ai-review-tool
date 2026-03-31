@@ -41,7 +41,7 @@ protected:
 TEST_F(ClaudeLlmClientIntegrationTest, RealApiReturnsSuccessfulResponse) {
     auto client_result = make_claude_client();
     ASSERT_TRUE(client_result.has_value())
-        << "make_claude_client() failed: " << static_cast<int>(client_result.error());
+        << "make_claude_client() failed: " << llm::to_string(client_result.error());
 
     auto& client = *client_result;
 
@@ -51,7 +51,7 @@ TEST_F(ClaudeLlmClientIntegrationTest, RealApiReturnsSuccessfulResponse) {
 
     const auto result = client.complete(request);
 
-    ASSERT_TRUE(result.has_value()) << "complete() failed: " << static_cast<int>(result.error());
+    ASSERT_TRUE(result.has_value()) << "complete() failed: " << llm::to_string(result.error());
     EXPECT_FALSE(result->content.empty());
     EXPECT_FALSE(result->stop_reason.empty());
     EXPECT_GT(result->input_tokens, 0u);
