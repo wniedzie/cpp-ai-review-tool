@@ -43,3 +43,5 @@
 #AI directories
 /.ai/
 /build/
+/.vscode/
+mcp.json
