@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(cpp-ai-review-tool LANGUAGES CXX)
+project(cpp-ai-review-tool VERSION 0.1.0 LANGUAGES CXX)
 
 # C++23 requires GCC 13+ or Clang 16+. On Ubuntu 22.04, install via:
 #   sudo add-apt-repository ppa:ubuntu-toolchain-r/test && sudo apt install g++-13
@@ -18,6 +18,15 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(FetchContent)
+
+# ── CLI11 (header-only argument parser) ──────────────────────────────────────
+FetchContent_Declare(
+    CLI11
+    GIT_REPOSITORY https://github.com/CLIUtils/CLI11.git
+    GIT_TAG        v2.4.1
+    GIT_SHALLOW    TRUE
+)
+FetchContent_MakeAvailable(CLI11)
 
 # ── cpp-httplib (header-only HTTPS client, uses OpenSSL) ──────────────────────
 FetchContent_Declare(
@@ -74,16 +83,22 @@ add_library(cpp_review_lib STATIC
     src/llm/rate_limited_llm_client.cpp
     src/llm/claude_llm_client.cpp
     src/llm/httplib_http_client.cpp
+    src/cli/cli_args.cpp
 )
 
 target_include_directories(cpp_review_lib PUBLIC
     ${CMAKE_SOURCE_DIR}/include
 )
 
+target_compile_definitions(cpp_review_lib PUBLIC
+    CPP_REVIEW_VERSION="${PROJECT_VERSION}"
+)
+
 target_link_libraries(cpp_review_lib PRIVATE
     httplib::httplib
     Threads::Threads
     nlohmann_json::nlohmann_json
+    CLI11::CLI11
 )
 
 # ── Main executable ───────────────────────────────────────────────────────────
