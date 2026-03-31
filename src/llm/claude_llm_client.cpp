@@ -1,5 +1,7 @@
 #include "llm/claude_llm_client.hpp"
 
+#include <algorithm>
+#include <cctype>
 #include <chrono>
 #include <cstdint>
 #include <cstdlib>
