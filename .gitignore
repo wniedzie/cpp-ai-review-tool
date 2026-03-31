@@ -45,3 +45,4 @@
 /build/
 /.vscode/
 mcp.json
+compile_commands.json
