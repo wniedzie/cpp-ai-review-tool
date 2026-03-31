@@ -54,8 +54,8 @@ TEST_F(ClaudeLlmClientIntegrationTest, RealApiReturnsSuccessfulResponse) {
     ASSERT_TRUE(result.has_value()) << "complete() failed: " << llm::to_string(result.error());
     EXPECT_FALSE(result->content.empty());
     EXPECT_FALSE(result->stop_reason.empty());
-    EXPECT_GT(result->input_tokens, 0u);
-    EXPECT_GT(result->output_tokens, 0u);
+    EXPECT_GT(result->input_tokens, 0U);
+    EXPECT_GT(result->output_tokens, 0U);
 }
 
 TEST_F(ClaudeLlmClientIntegrationTest, RealApiWithInvalidKeyReturnsAuthFailure) {

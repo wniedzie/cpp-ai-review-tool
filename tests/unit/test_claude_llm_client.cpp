@@ -63,7 +63,8 @@ protected:
     void SetUp() override {
         auto mock_owner = std::make_unique<MockHttpClient>();
         mock_           = mock_owner.get();
-        client_ = std::make_unique<ClaudeLlmClient>("valid-key", "test-model", std::move(mock_owner));
+        client_ =
+            std::make_unique<ClaudeLlmClient>("valid-key", "test-model", std::move(mock_owner));
     }
 
     // unique_ptr avoids the need for move-assignment (which LlmClient deletes).
@@ -150,8 +151,8 @@ TEST_F(ClaudeLlmClientTest, RequestModelOverridesClientModel) {
 }
 
 TEST_F(ClaudeLlmClientTest, ClientModelUsedWhenRequestModelAbsent) {
-    auto                           mock_owner = std::make_unique<MockHttpClient>();
-    auto*                          local_mock = mock_owner.get();
+    auto                             mock_owner = std::make_unique<MockHttpClient>();
+    auto*                            local_mock = mock_owner.get();
     std::unique_ptr<ClaudeLlmClient> client =
         std::make_unique<ClaudeLlmClient>("valid-key", "my-custom-model", std::move(mock_owner));
 
@@ -213,8 +214,8 @@ TEST_F(ClaudeLlmClientTest, MaxTokensCustomValue) {
 // ─── Header assertions ────────────────────────────────────────────────────────
 
 TEST_F(ClaudeLlmClientTest, ApiKeyPassedInHeader) {
-    auto                           mock_owner = std::make_unique<MockHttpClient>();
-    auto*                          local_mock = mock_owner.get();
+    auto                             mock_owner = std::make_unique<MockHttpClient>();
+    auto*                            local_mock = mock_owner.get();
     std::unique_ptr<ClaudeLlmClient> client =
         std::make_unique<ClaudeLlmClient>("my-secret-key", "test-model", std::move(mock_owner));
 
@@ -286,7 +287,8 @@ protected:
     void SetUp() override {
         auto mock_owner = std::make_unique<MockHttpClient>();
         mock_           = mock_owner.get();
-        client_ = std::make_unique<ClaudeLlmClient>("valid-key", "test-model", std::move(mock_owner));
+        client_ =
+            std::make_unique<ClaudeLlmClient>("valid-key", "test-model", std::move(mock_owner));
     }
 
     std::unique_ptr<ClaudeLlmClient> client_;
@@ -335,7 +337,8 @@ protected:
     void SetUp() override {
         auto mock_owner = std::make_unique<MockHttpClient>();
         mock_           = mock_owner.get();
-        client_ = std::make_unique<ClaudeLlmClient>("valid-key", "test-model", std::move(mock_owner));
+        client_ =
+            std::make_unique<ClaudeLlmClient>("valid-key", "test-model", std::move(mock_owner));
     }
 
     std::unique_ptr<ClaudeLlmClient> client_;
