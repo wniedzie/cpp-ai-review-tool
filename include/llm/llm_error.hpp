@@ -6,8 +6,8 @@
 namespace llm {
 
 enum class LlmError {
-    AuthFailure,      // invalid or missing ANTHROPIC_API_KEY
-    RateLimited,      // HTTP 429 from API
+    AuthFailure,       // invalid or missing ANTHROPIC_API_KEY
+    RateLimited,       // HTTP 429 from API
     NetworkError,      // connection failure or timeout
     ParseError,        // malformed API response body
     InvalidRequest,    // HTTP 400 — bad model name or malformed body

@@ -62,6 +62,7 @@ FetchContent_MakeAvailable(googletest)
 add_library(cpp_review_lib STATIC
     src/llm/rate_limited_llm_client.cpp
     src/llm/claude_llm_client.cpp
+    src/llm/httplib_http_client.cpp
 )
 
 target_include_directories(cpp_review_lib PUBLIC

@@ -5,33 +5,36 @@
 #include <chrono>
 #include <cstdint>
 #include <cstdlib>
+#include <memory>
 #include <string>
 #include <string_view>
 #include <utility>
+#include <vector>
 
-#include <httplib.h>
 #include <nlohmann/json.hpp>
+
+#include "llm/httplib_http_client.hpp"
 
 namespace llm {
 
 namespace {
 
-constexpr std::string_view     default_model      = "claude-sonnet-4-6";
-constexpr auto                 api_host           = "api.anthropic.com";
+constexpr std::string_view     api_host           = "api.anthropic.com";
 constexpr std::string_view     api_path           = "/v1/messages";
 constexpr std::string_view     api_version        = "2023-06-01";
+constexpr std::string_view     default_model      = "claude-sonnet-4-6";
 constexpr std::uint32_t        default_max_tokens = 4096;
 constexpr std::chrono::seconds request_timeout{30};
 
 // Validates an API key against the character set used by Anthropic keys
 // (alphanumeric, hyphens, underscores). Rejects anything containing CR/LF or
 // other characters that could enable HTTP header injection.
-[[nodiscard]] bool is_valid_api_key(std::string_view key) noexcept {
+[[nodiscard]] bool is_valid_api_key(const std::string_view key) noexcept {
     if (key.empty()) {
         return false;
     }
     return std::ranges::all_of(key, [](const unsigned char c) {
-        return std::isalnum(c) || c == '-' || c == '_';
+        return std::isalnum(c) != 0 || c == '-' || c == '_';
     });
 }
 
@@ -81,23 +84,17 @@ constexpr std::chrono::seconds request_timeout{30};
 }
 
 [[nodiscard]] std::expected<LlmResponse, LlmError>
-send_request(const std::string& body, const std::string& api_key) {
-    httplib::SSLClient client{api_host, 443};
-    client.set_read_timeout(request_timeout);
-    client.set_connection_timeout(request_timeout);
-    client.enable_server_certificate_verification(true);
-
-    const httplib::Headers headers = {
-        {"x-api-key", api_key},
-        {"anthropic-version", std::string{api_version}},
+send_request(IHttpClient& http_client, const std::string& body, const std::string& api_key) {
+    const std::vector<HttpHeader> headers = {
+        {.name = "x-api-key", .value = api_key},
+        {.name = "anthropic-version", .value = std::string{api_version}},
     };
 
-    const auto result = client.Post(std::string{api_path}, headers, body, "application/json");
+    const auto result = http_client.post(api_path, headers, body, "application/json");
 
     if (!result) {
         return std::unexpected{LlmError::NetworkError};
     }
-
     if (result->status != 200) {
         return std::unexpected{map_http_status(result->status)};
     }
@@ -111,12 +108,20 @@ send_request(const std::string& body, const std::string& api_key) {
 
 ClaudeLlmClient::ClaudeLlmClient(std::string api_key, std::string model)
     : m_api_key{std::move(api_key)}
-    , m_model{std::move(model)} {}
+    , m_model{std::move(model)}
+    , m_http_client{std::make_unique<HttplibSslClient>(api_host, 443, request_timeout)} {}
+
+ClaudeLlmClient::ClaudeLlmClient(
+    std::string api_key, std::string model, std::unique_ptr<IHttpClient> http_client
+)
+    : m_api_key{std::move(api_key)}
+    , m_model{std::move(model)}
+    , m_http_client{std::move(http_client)} {}
 
 std::expected<LlmResponse, LlmError> ClaudeLlmClient::complete(const LlmRequest& request) {
     const auto effective_model = request.model.value_or(m_model);
     const auto body            = build_request_body(request, effective_model);
-    return send_request(body, m_api_key);
+    return send_request(*m_http_client, body, m_api_key);
 }
 
 // ─── Factory ─────────────────────────────────────────────────────────────────
