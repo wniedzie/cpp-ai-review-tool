@@ -25,6 +25,17 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Install latest GCC
+        run: |
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa -y 
+          sudo apt-get update
+          sudo apt install -y g++-13 gcc-13
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 60 --slave /usr/bin/g++ g++ /usr/bin/g++-13
+          sudo apt-get install -y gcc-13-multilib g++-13-multilib
+
+      - name: Print GCC version
+        run: gcc --version
+
       - name: Install dependencies
         run: |
           sudo apt-get update
