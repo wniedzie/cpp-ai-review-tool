@@ -29,9 +29,9 @@ jobs:
         run: |
           sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa -y 
           sudo apt-get update
-          sudo apt install -y g++-13 gcc-13
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 60 --slave /usr/bin/g++ g++ /usr/bin/g++-13
-          sudo apt-get install -y gcc-13-multilib g++-13-multilib
+          sudo apt install -y g++-15 gcc-15
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-15 60 --slave /usr/bin/g++ g++ /usr/bin/g++-15
+          sudo apt-get install -y gcc-15-multilib g++-15-multilib
 
       - name: Print GCC version
         run: gcc --version
@@ -60,7 +60,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y g++-13 libssl-dev nlohmann-json3-dev
+          sudo apt-get install -y g++-15 libssl-dev nlohmann-json3-dev
 
       - name: Cache CMake build
         uses: actions/cache@v4
@@ -71,9 +71,9 @@ jobs:
             ${{ runner.os }}-cmake-
 
       - name: Configure
-        run: cmake -B build -DCMAKE_CXX_COMPILER=g++-13 -DCMAKE_BUILD_TYPE=Release
+        run: cmake -B build -DCMAKE_CXX_COMPILER=g++-15 -DCMAKE_BUILD_TYPE=Release
         env:
-          CXX: g++-13
+          CXX: g++-15
 
       - name: Build
         run: cmake --build build --parallel $(nproc)
