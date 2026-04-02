@@ -63,12 +63,13 @@ protected:
     void SetUp() override {
         auto mock_owner = std::make_unique<MockHttpClient>();
         mock_           = mock_owner.get();
-        client_.emplace("valid-key", "test-model", std::move(mock_owner));
+        client_ =
+            std::make_unique<ClaudeLlmClient>("valid-key", "test-model", std::move(mock_owner));
     }
 
-    // std::optional avoids the need for move-assignment (which LlmClient deletes).
-    std::optional<ClaudeLlmClient> client_;
-    MockHttpClient*                mock_{nullptr};
+    // unique_ptr avoids the need for move-assignment (which LlmClient deletes).
+    std::unique_ptr<ClaudeLlmClient> client_;
+    MockHttpClient*                  mock_{nullptr};
 
     static LlmRequest minimal_request() {
         return LlmRequest{.system_prompt = "", .user_content = "Hello"};
@@ -87,8 +88,8 @@ TEST_F(ClaudeLlmClientTest, SuccessfulResponseParsed) {
     ASSERT_TRUE(result.has_value());
     EXPECT_EQ(result->content, "Answer");
     EXPECT_EQ(result->stop_reason, "end_turn");
-    EXPECT_EQ(result->input_tokens, 8u);
-    EXPECT_EQ(result->output_tokens, 3u);
+    EXPECT_EQ(result->input_tokens, 8U);
+    EXPECT_EQ(result->output_tokens, 3U);
 }
 
 // ─── Request body construction ────────────────────────────────────────────────
@@ -150,10 +151,10 @@ TEST_F(ClaudeLlmClientTest, RequestModelOverridesClientModel) {
 }
 
 TEST_F(ClaudeLlmClientTest, ClientModelUsedWhenRequestModelAbsent) {
-    auto                           mock_owner = std::make_unique<MockHttpClient>();
-    auto*                          local_mock = mock_owner.get();
-    std::optional<ClaudeLlmClient> client;
-    client.emplace("valid-key", "my-custom-model", std::move(mock_owner));
+    auto                             mock_owner = std::make_unique<MockHttpClient>();
+    auto*                            local_mock = mock_owner.get();
+    std::unique_ptr<ClaudeLlmClient> client =
+        std::make_unique<ClaudeLlmClient>("valid-key", "my-custom-model", std::move(mock_owner));
 
     std::string captured_body;
     EXPECT_CALL(*local_mock, post(_, _, _, _))
@@ -188,7 +189,7 @@ TEST_F(ClaudeLlmClientTest, MaxTokensDefaultedTo4096) {
     std::ignore = client_->complete(minimal_request());
 
     const auto json = nlohmann::json::parse(captured_body);
-    EXPECT_EQ(json.at("max_tokens").get<std::uint32_t>(), 4096u);
+    EXPECT_EQ(json.at("max_tokens").get<std::uint32_t>(), 4096U);
 }
 
 TEST_F(ClaudeLlmClientTest, MaxTokensCustomValue) {
@@ -203,20 +204,20 @@ TEST_F(ClaudeLlmClientTest, MaxTokensCustomValue) {
         });
 
     LlmRequest request = minimal_request();
-    request.max_tokens = 100u;
+    request.max_tokens = 100U;
     std::ignore        = client_->complete(request);
 
     const auto json = nlohmann::json::parse(captured_body);
-    EXPECT_EQ(json.at("max_tokens").get<std::uint32_t>(), 100u);
+    EXPECT_EQ(json.at("max_tokens").get<std::uint32_t>(), 100U);
 }
 
 // ─── Header assertions ────────────────────────────────────────────────────────
 
 TEST_F(ClaudeLlmClientTest, ApiKeyPassedInHeader) {
-    auto                           mock_owner = std::make_unique<MockHttpClient>();
-    auto*                          local_mock = mock_owner.get();
-    std::optional<ClaudeLlmClient> client;
-    client.emplace("my-secret-key", "test-model", std::move(mock_owner));
+    auto                             mock_owner = std::make_unique<MockHttpClient>();
+    auto*                            local_mock = mock_owner.get();
+    std::unique_ptr<ClaudeLlmClient> client =
+        std::make_unique<ClaudeLlmClient>("my-secret-key", "test-model", std::move(mock_owner));
 
     std::vector<HttpHeader> captured_headers;
     EXPECT_CALL(*local_mock, post(_, _, _, _))
@@ -230,11 +231,11 @@ TEST_F(ClaudeLlmClientTest, ApiKeyPassedInHeader) {
 
     std::ignore = client->complete(minimal_request());
 
-    const auto it = std::ranges::find_if(captured_headers, [](const HttpHeader& h) {
-        return h.name == "x-api-key";
+    const auto pos = std::ranges::find_if(captured_headers, [](const HttpHeader& hdr) {
+        return hdr.name == "x-api-key";
     });
-    ASSERT_NE(it, captured_headers.end());
-    EXPECT_EQ(it->value, "my-secret-key");
+    ASSERT_NE(pos, captured_headers.end());
+    EXPECT_EQ(pos->value, "my-secret-key");
 }
 
 TEST_F(ClaudeLlmClientTest, AnthropicVersionHeaderPresent) {
@@ -250,11 +251,11 @@ TEST_F(ClaudeLlmClientTest, AnthropicVersionHeaderPresent) {
 
     std::ignore = client_->complete(minimal_request());
 
-    const auto it = std::ranges::find_if(captured_headers, [](const HttpHeader& h) {
-        return h.name == "anthropic-version";
+    const auto pos = std::ranges::find_if(captured_headers, [](const HttpHeader& hdr) {
+        return hdr.name == "anthropic-version";
     });
-    ASSERT_NE(it, captured_headers.end());
-    EXPECT_EQ(it->value, "2023-06-01");
+    ASSERT_NE(pos, captured_headers.end());
+    EXPECT_EQ(pos->value, "2023-06-01");
 }
 
 TEST_F(ClaudeLlmClientTest, ContentTypeHeaderIsApplicationJson) {
@@ -263,8 +264,8 @@ TEST_F(ClaudeLlmClientTest, ContentTypeHeaderIsApplicationJson) {
         .WillOnce([&](std::string_view,
                       const std::vector<HttpHeader>&,
                       const std::string&,
-                      std::string_view ct) {
-            captured_ct = ct;
+                      std::string_view ctype) {
+            captured_ct = ctype;
             return HttpResponse{.status = 200, .body = make_success_body()};
         });
 
@@ -286,11 +287,12 @@ protected:
     void SetUp() override {
         auto mock_owner = std::make_unique<MockHttpClient>();
         mock_           = mock_owner.get();
-        client_.emplace("valid-key", "test-model", std::move(mock_owner));
+        client_ =
+            std::make_unique<ClaudeLlmClient>("valid-key", "test-model", std::move(mock_owner));
     }
 
-    std::optional<ClaudeLlmClient> client_;
-    MockHttpClient*                mock_{nullptr};
+    std::unique_ptr<ClaudeLlmClient> client_;
+    MockHttpClient*                  mock_{nullptr};
 };
 
 TEST_P(HttpStatusMappingTest, MapsHttpStatusToLlmError) {
@@ -335,11 +337,12 @@ protected:
     void SetUp() override {
         auto mock_owner = std::make_unique<MockHttpClient>();
         mock_           = mock_owner.get();
-        client_.emplace("valid-key", "test-model", std::move(mock_owner));
+        client_ =
+            std::make_unique<ClaudeLlmClient>("valid-key", "test-model", std::move(mock_owner));
     }
 
-    std::optional<ClaudeLlmClient> client_;
-    MockHttpClient*                mock_{nullptr};
+    std::unique_ptr<ClaudeLlmClient> client_;
+    MockHttpClient*                  mock_{nullptr};
 };
 
 TEST_P(MalformedResponseBodyTest, ReturnsParseError) {

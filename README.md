@@ -17,6 +17,13 @@ cmake --build build
 # binary: build/cpp-review
 ```
 
+To enable clang-tidy static analysis during the build (requires `clang-tidy-16+`):
+
+```bash
+cmake -S . -B build -DENABLE_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER=clang++-18
+cmake --build build
+```
+
 ## Tests
 
 Unit tests are built automatically. Integration tests require `ANTHROPIC_API_KEY` and must be enabled explicitly.
@@ -33,20 +40,27 @@ ANTHROPIC_API_KEY=<key> ctest --test-dir build --output-on-failure
 
 ## CI
 
-A GitHub Actions workflow (`.github/workflows/pr.yml`) runs on every pull request targeting `main`:
+Two GitHub Actions workflows run automatically:
+
+**`.github/workflows/pr.yml`** — runs on every pull request targeting `main`:
 - **Clang-Format** — enforces formatting with `clang-format-15`
+- **Clang-Tidy** — configures with `clang++-18` and `-DENABLE_CLANG_TIDY=ON`, treats all warnings as errors
 - **Build & Test** — configures with `g++-13`, builds, and runs unit tests via CTest
+
+**`.github/workflows/main.yml`** — runs on every push to `main` with the same three jobs.
 
 ## Project Structure
 
 ```
 .
 ├── .clang-format
+├── .clang-tidy
 ├── .clangd
 ├── CMakeLists.txt
 ├── .github/
 │   └── workflows/
-│       └── pr.yml              # PR check: formatting + build + test
+│       ├── pr.yml              # PR check: formatting + clang-tidy + build + test
+│       └── main.yml            # Main branch: same jobs on push to main
 ├── include/
 │   └── llm/
 │       ├── llm_client.hpp          # Abstract LLM client interface
@@ -63,11 +77,10 @@ A GitHub Actions workflow (`.github/workflows/pr.yml`) runs on every pull reques
 │       ├── claude_llm_client.cpp
 │       ├── httplib_http_client.cpp
 │       └── rate_limited_llm_client.cpp
-├── tests/
-│   ├── unit/
-│   │   ├── test_claude_llm_client.cpp
-│   │   └── test_make_claude_client.cpp
-│   └── integration/
-│       └── test_claude_llm_client_integration.cpp
-└── docs/
+└── tests/
+    ├── unit/
+    │   ├── test_claude_llm_client.cpp
+    │   └── test_make_claude_client.cpp
+    └── integration/
+        └── test_claude_llm_client_integration.cpp
 ```

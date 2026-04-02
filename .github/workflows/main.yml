@@ -7,7 +7,7 @@ on:
 jobs:
   clang-format:
     name: Clang-Format
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
 
@@ -19,9 +19,30 @@ jobs:
           find include src tests -type f \( -name '*.cpp' -o -name '*.hpp' -o -name '*.h' \) \
             | xargs clang-format-15 --dry-run --Werror
 
+  clang-tidy:
+    name: Clang-Tidy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-18 clang-tidy-18 libssl-dev nlohmann-json3-dev
+
+      - name: Configure
+        run: |
+          cmake -B build \
+            -DCMAKE_CXX_COMPILER=clang++-18 \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DENABLE_CLANG_TIDY=ON
+
+      - name: Lint
+        run: cmake --build build --parallel $(nproc)
+
   build-and-test:
     name: Build & Test
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
 

@@ -33,8 +33,8 @@ constexpr std::chrono::seconds request_timeout{30};
     if (key.empty()) {
         return false;
     }
-    return std::ranges::all_of(key, [](const unsigned char c) {
-        return std::isalnum(c) != 0 || c == '-' || c == '_';
+    return std::ranges::all_of(key, [](const unsigned char chr) {
+        return std::isalnum(chr) != 0 || chr == '-' || chr == '_';
     });
 }
 
@@ -139,7 +139,7 @@ std::expected<ClaudeLlmClient, LlmError> make_claude_client() {
     }
 
     const auto* const model_env = std::getenv("CPP_REVIEW_MODEL");
-    const auto        model     = (model_env != nullptr && !std::string_view{model_env}.empty())
+    auto              model     = (model_env != nullptr && !std::string_view{model_env}.empty())
                                       ? std::string{model_env}
                                       : std::string{default_model};
 
