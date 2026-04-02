@@ -25,6 +25,8 @@ HeaderFilterRegex: '^(include|src)/.*'
 # std::expected (and other C++23 features guarded the same way) are visible
 # to clang-tidy.  -Wno-builtin-macro-redefined suppresses the diagnostic
 # that Clang emits when a built-in feature-test macro is redefined.
+# NOTE: GCC 14+ changed this guard, so the clang-tidy job must use Ubuntu
+# 24.04's system GCC (13) rather than a newer GCC from an external PPA.
 ExtraArgsBefore:
   - '-Wno-builtin-macro-redefined'
   - '-D__cpp_concepts=202002L'
