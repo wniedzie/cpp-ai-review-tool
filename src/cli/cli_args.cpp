@@ -1,6 +1,7 @@
 #include "cli/cli_args.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <filesystem>
 #include <format>
 #include <iterator>
@@ -8,46 +9,49 @@
 #include <ranges>
 #include <set>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <CLI/CLI.hpp>
 
+#include "core/hash.hpp"
+
 namespace cli {
 
 namespace {
+using namespace std::literals;
+using namespace core;
 
-[[nodiscard]] std::optional<CheckCategory> check_category_from_string(std::string_view s) noexcept {
-    if (s == "ub")
-        return CheckCategory::ub;
-    if (s == "memory")
-        return CheckCategory::memory;
-    if (s == "modernization")
-        return CheckCategory::modernization;
-    return std::nullopt;
+[[nodiscard]] std::optional<CheckCategory>
+check_category_from_string(const std::string_view& category) noexcept {
+    switch (hash(category)) {
+        case "ub"_h: return CheckCategory::ub;
+        case "memory"_h: return CheckCategory::memory;
+        case "modernization"_h: return CheckCategory::modernization;
+        default: return std::nullopt;
+    }
 }
 
-[[nodiscard]] std::optional<Severity> severity_from_string(std::string_view s) noexcept {
-    if (s == "critical")
-        return Severity::critical;
-    if (s == "high")
-        return Severity::high;
-    if (s == "medium")
-        return Severity::medium;
-    if (s == "low")
-        return Severity::low;
-    if (s == "info")
-        return Severity::info;
-    return std::nullopt;
+[[nodiscard]] std::optional<Severity> severity_from_string(const std::string_view& severity
+) noexcept {
+    switch (hash(severity)) {
+        case "critical"_h: return Severity::critical;
+        case "high"_h: return Severity::high;
+        case "medium"_h: return Severity::medium;
+        case "low"_h: return Severity::low;
+        case "info"_h: return Severity::info;
+        default: return std::nullopt;
+    }
 }
 
-[[nodiscard]] std::optional<OutputFormat> output_format_from_string(std::string_view s) noexcept {
-    if (s == "markdown")
-        return OutputFormat::markdown;
-    if (s == "json")
-        return OutputFormat::json;
-    if (s == "sarif")
-        return OutputFormat::sarif;
-    return std::nullopt;
+[[nodiscard]] std::optional<OutputFormat> output_format_from_string(std::string_view format
+) noexcept {
+    switch (hash(format)) {
+        case "markdown"_h: return OutputFormat::markdown;
+        case "json"_h: return OutputFormat::json;
+        case "sarif"_h: return OutputFormat::sarif;
+        default: return std::nullopt;
+    }
 }
 
 [[nodiscard]] std::expected<std::set<CheckCategory>, std::string>

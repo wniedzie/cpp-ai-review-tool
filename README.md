@@ -83,6 +83,8 @@ Two GitHub Actions workflows run automatically:
 ├── include/
 │   ├── cli/
 │   │   └── cli_args.hpp            # CLI argument types and parse_args()
+│   ├── core/
+│   │   └── hash.hpp                # FNV-1a compile-time hash utility
 │   └── llm/
 │       ├── llm_client.hpp          # Abstract LLM client interface
 │       ├── llm_request.hpp
@@ -107,5 +109,4 @@ Two GitHub Actions workflows run automatically:
 │   │   └── test_make_claude_client.cpp
 │   └── integration/
 │       └── test_claude_llm_client_integration.cpp
-└── docs/
 ```
