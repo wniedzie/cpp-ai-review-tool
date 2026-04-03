@@ -11,6 +11,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Rebase onto main
+        run: |
+          git fetch origin main
+          git rebase origin/main
+
       - name: Install clang-format
         run: sudo apt-get update && sudo apt-get install -y clang-format-15
 
@@ -24,6 +29,11 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
+
+      - name: Rebase onto main
+        run: |
+          git fetch origin main
+          git rebase origin/main
 
       - name: Install dependencies
         run: |
@@ -45,6 +55,11 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
+
+      - name: Rebase onto main
+        run: |
+          git fetch origin main
+          git rebase origin/main
 
       - name: Install dependencies
         run: |
