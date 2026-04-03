@@ -10,14 +10,14 @@
 
 namespace cli {
 
-enum class CheckCategory { ub, memory, modernization };
+enum class CheckCategory : std::uint8_t { ub, memory, modernization };
 
-enum class Severity { critical, high, medium, low, info };
+enum class Severity : std::uint8_t { critical, high, medium, low, info };
 
-enum class OutputFormat { markdown, json, sarif };
+enum class OutputFormat : std::uint8_t { markdown, json, sarif };
 
-[[nodiscard]] constexpr std::string_view to_string(CheckCategory c) noexcept {
-    switch (c) {
+[[nodiscard]] constexpr std::string_view to_string(CheckCategory category) noexcept {
+    switch (category) {
         case CheckCategory::ub: return "ub";
         case CheckCategory::memory: return "memory";
         case CheckCategory::modernization: return "modernization";
@@ -25,8 +25,8 @@ enum class OutputFormat { markdown, json, sarif };
     return "unknown";
 }
 
-[[nodiscard]] constexpr std::string_view to_string(Severity s) noexcept {
-    switch (s) {
+[[nodiscard]] constexpr std::string_view to_string(Severity severity) noexcept {
+    switch (severity) {
         case Severity::critical: return "critical";
         case Severity::high: return "high";
         case Severity::medium: return "medium";
@@ -36,8 +36,8 @@ enum class OutputFormat { markdown, json, sarif };
     return "unknown";
 }
 
-[[nodiscard]] constexpr std::string_view to_string(OutputFormat f) noexcept {
-    switch (f) {
+[[nodiscard]] constexpr std::string_view to_string(OutputFormat format) noexcept {
+    switch (format) {
         case OutputFormat::markdown: return "markdown";
         case OutputFormat::json: return "json";
         case OutputFormat::sarif: return "sarif";

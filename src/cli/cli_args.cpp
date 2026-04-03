@@ -10,6 +10,7 @@
 #include <set>
 #include <string>
 #include <string_view>
+#include <system_error>
 #include <vector>
 
 #include <CLI/CLI.hpp>
@@ -133,16 +134,22 @@ std::expected<CliArgs, std::string> parse_args(int argc, const char* const* argv
     try {
         app.parse(argc, argv);
     } catch (const CLI::ParseError& e) {
-        const int exit_code = app.exit(e);
-        if (exit_code == 0) {
-            std::exit(0);  // --help or --version printed successfully
+        if (e.get_exit_code() == 0) {
+            app.exit(e);  // prints --help or --version output
+            std::exit(0);
         }
         return std::unexpected(e.what());
     }
 
     // Validate input path exists
     const std::filesystem::path input_path{input_path_str};
-    if (!std::filesystem::exists(input_path)) {
+    std::error_code             err;
+    if (!std::filesystem::exists(input_path, err)) {
+        if (err) {
+            return std::unexpected(
+                std::format("cannot access path '{}': {}", input_path_str, err.message())
+            );
+        }
         return std::unexpected(std::format("path does not exist: '{}'", input_path_str));
     }
 

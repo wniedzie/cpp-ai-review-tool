@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <gtest/gtest.h>
+#include <unistd.h>
 
 #include "cli/cli_args.hpp"
 
@@ -16,19 +17,19 @@ struct Argv {
     explicit Argv(std::initializer_list<std::string> args) {
         strings.reserve(args.size() + 1);
         strings.emplace_back("cpp-review");
-        for (const auto& a : args) {
-            strings.push_back(a);
+        for (const auto& arg : args) {
+            strings.push_back(arg);
         }
         ptrs.reserve(strings.size());
-        for (const auto& s : strings) {
-            ptrs.push_back(s.c_str());
+        for (const auto& string : strings) {
+            ptrs.push_back(string.c_str());
         }
     }
 
-    int count() const {
+    [[nodiscard]] int count() const {
         return static_cast<int>(ptrs.size());
     }
-    const char* const* data() const {
+    [[nodiscard]] const char* const* data() const {
         return ptrs.data();
     }
 
@@ -41,7 +42,10 @@ struct Argv {
 class CliArgsTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        temp_file_ = std::filesystem::temp_directory_path() / "cpp_review_test_file.cpp";
+        const auto*       info        = ::testing::UnitTest::GetInstance()->current_test_info();
+        const std::string unique_name = std::string("cpp_review_") + info->test_suite_name() + "_" +
+                                        info->name() + "_" + std::to_string(getpid()) + ".cpp";
+        temp_file_ = std::filesystem::temp_directory_path() / unique_name;
         std::ofstream{temp_file_};  // create empty file
     }
 
