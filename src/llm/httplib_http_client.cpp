@@ -28,8 +28,8 @@ std::optional<HttpResponse> HttplibSslClient::post(
     client.enable_server_certificate_verification(true);
 
     httplib::Headers httplib_headers;
-    std::ranges::for_each(headers, [&](const HttpHeader& h) {
-        httplib_headers.emplace(h.name, h.value);
+    std::ranges::for_each(headers, [&](const HttpHeader& header) {
+        httplib_headers.emplace(header.name, header.value);
     });
 
     const auto result =

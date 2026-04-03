@@ -33,6 +33,8 @@ public:
 
     IHttpClient(const IHttpClient&)            = delete;
     IHttpClient& operator=(const IHttpClient&) = delete;
+    IHttpClient(IHttpClient&&)                 = delete;
+    IHttpClient& operator=(IHttpClient&&)      = delete;
 
 protected:
     IHttpClient() = default;
