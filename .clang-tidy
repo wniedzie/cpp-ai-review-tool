@@ -18,3 +18,7 @@ Checks: >
 WarningsAsErrors: "*"
 
 HeaderFilterRegex: "^(include|src)/.*"
+
+ExtraArgsBefore:
+  - "-Wno-builtin-macro-redefined"
+  - "-D__cpp_concepts=202002L"

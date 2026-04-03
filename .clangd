@@ -1,3 +1,4 @@
 CompileFlags:
   CompilationDatabase: build
   Compiler: g++-15
+  Add: [-D__cpp_concepts=202002L]
