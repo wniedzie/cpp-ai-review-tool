@@ -72,7 +72,7 @@ option(ENABLE_CLANG_TIDY "Enable clang-tidy static analysis during build" OFF)
 if(ENABLE_CLANG_TIDY)
     # clang-tidy < 16 does not recognise -std=c++23; require 16+.
     find_program(CLANG_TIDY_EXE
-        NAMES clang-tidy-19
+        NAMES clang-tidy-19 clang-tidy-18
         REQUIRED
     )
     set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE}")
