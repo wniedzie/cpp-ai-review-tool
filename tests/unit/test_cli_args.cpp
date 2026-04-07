@@ -82,7 +82,7 @@ TEST_F(CliArgsTest, ChecksUbMemory) {
     ASSERT_TRUE(result.has_value());
     ASSERT_TRUE(result->checks.has_value());
     EXPECT_THAT(
-        result->checks.value(),
+        result->checks.value(),  // NOLINT(bugprone-unchecked-optional-access)
         ::testing::UnorderedElementsAre(cli::CheckCategory::ub, cli::CheckCategory::memory)
     );
 }
@@ -94,7 +94,8 @@ TEST_F(CliArgsTest, ChecksModernizationOnly) {
     ASSERT_TRUE(result.has_value());
     ASSERT_TRUE(result->checks.has_value());
     EXPECT_THAT(
-        result->checks.value(), ::testing::UnorderedElementsAre(cli::CheckCategory::modernization)
+        result->checks.value(),  // NOLINT(bugprone-unchecked-optional-access)
+        ::testing::UnorderedElementsAre(cli::CheckCategory::modernization)
     );
 }
 
@@ -114,7 +115,9 @@ TEST_F(CliArgsTest, FailOnCriticalOnly) {
 
     ASSERT_TRUE(result.has_value());
     ASSERT_TRUE(result->fail_on.has_value());
-    EXPECT_THAT(result->fail_on.value(), ::testing::UnorderedElementsAre(cli::Severity::critical));
+    EXPECT_THAT(
+        result->fail_on.value(), ::testing::UnorderedElementsAre(cli::Severity::critical)
+    );  // NOLINT(bugprone-unchecked-optional-access)
 }
 
 TEST_F(CliArgsTest, FailOnAllLevelsBelow) {
@@ -124,7 +127,7 @@ TEST_F(CliArgsTest, FailOnAllLevelsBelow) {
     ASSERT_TRUE(result.has_value());
     ASSERT_TRUE(result->fail_on.has_value());
     EXPECT_THAT(
-        result->fail_on.value(),
+        result->fail_on.value(),  // NOLINT(bugprone-unchecked-optional-access)
         ::testing::UnorderedElementsAre(
             cli::Severity::low, cli::Severity::medium, cli::Severity::high, cli::Severity::critical
         )
