@@ -1,4 +1,5 @@
 # cpp-ai-review-tool
+
 C++23 tool for AI assisted review
 
 ## Requirements
@@ -24,6 +25,23 @@ cmake -S . -B build -DENABLE_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER=clang++-18
 cmake --build build
 ```
 
+## Usage
+
+```
+cpp-review [OPTIONS] path
+```
+
+| Argument / Flag          | Default                   | Description                                           |
+| ------------------------ | ------------------------- | ----------------------------------------------------- |
+| `path`                   | _(required)_              | C++ source file or directory to review                |
+| `--checks <list>`        | `ub,memory,modernization` | Comma-separated check categories                      |
+| `--fail-on <list>`       | `high,critical`           | Severity levels that cause exit code 1                |
+| `--format <fmt>`         | `markdown`                | Output format: `markdown`, `json`, `sarif`            |
+| `--output <file>`        | _(stdout)_                | Write output to file instead of stdout                |
+| `--dry-run`              |                           | Estimate token count and cost without calling the API |
+| `--no-telemetry-warning` |                           | Suppress the one-time privacy notice                  |
+| `--version`              |                           | Print version and exit                                |
+
 ## Tests
 
 Unit tests are built automatically. Integration tests require `ANTHROPIC_API_KEY` and must be enabled explicitly.
@@ -43,6 +61,7 @@ ANTHROPIC_API_KEY=<key> ctest --test-dir build --output-on-failure
 Two GitHub Actions workflows run automatically:
 
 **`.github/workflows/pr.yml`** — runs on every pull request targeting `main`:
+
 - **Clang-Format** — enforces formatting with `clang-format-15`
 - **Clang-Tidy** — configures with `clang++-18` and `-DENABLE_CLANG_TIDY=ON`, treats all warnings as errors
 - **Build & Test** — configures with `g++-13`, builds, and runs unit tests via CTest
@@ -62,6 +81,10 @@ Two GitHub Actions workflows run automatically:
 │       ├── pr.yml              # PR check: formatting + clang-tidy + build + test
 │       └── main.yml            # Main branch: same jobs on push to main
 ├── include/
+│   ├── cli/
+│   │   └── cli_args.hpp            # CLI argument types and parse_args()
+│   ├── core/
+│   │   └── hash.hpp                # FNV-1a compile-time hash utility
 │   └── llm/
 │       ├── llm_client.hpp          # Abstract LLM client interface
 │       ├── llm_request.hpp
@@ -73,14 +96,17 @@ Two GitHub Actions workflows run automatically:
 │       └── rate_limited_llm_client.hpp
 ├── src/
 │   ├── main.cpp
+│   ├── cli/
+│   │   └── cli_args.cpp            # CLI11-based argument parsing
 │   └── llm/
 │       ├── claude_llm_client.cpp
 │       ├── httplib_http_client.cpp
 │       └── rate_limited_llm_client.cpp
-└── tests/
-    ├── unit/
-    │   ├── test_claude_llm_client.cpp
-    │   └── test_make_claude_client.cpp
-    └── integration/
-        └── test_claude_llm_client_integration.cpp
+├── tests/
+│   ├── unit/
+│   │   ├── test_cli_args.cpp
+│   │   ├── test_claude_llm_client.cpp
+│   │   └── test_make_claude_client.cpp
+│   └── integration/
+│       └── test_claude_llm_client_integration.cpp
 ```

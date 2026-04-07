@@ -15,18 +15,10 @@ Checks: >
   -performance-unnecessary-value-param,
   -cppcoreguidelines-non-private-member-variables-in-classes
 
-WarningsAsErrors: '*'
+WarningsAsErrors: "*"
 
-HeaderFilterRegex: '^(include|src)/.*'
+HeaderFilterRegex: "^(include|src)/.*"
 
-# Clang 18 reports __cpp_concepts=201907L (Concepts TS value), but GCC 13's
-# libstdc++ <expected> guards its content with __cpp_concepts >= 202002L
-# (the C++20 final value).  Override to the correct value so that
-# std::expected (and other C++23 features guarded the same way) are visible
-# to clang-tidy.  -Wno-builtin-macro-redefined suppresses the diagnostic
-# that Clang emits when a built-in feature-test macro is redefined.
-# NOTE: GCC 14+ changed this guard, so the clang-tidy job must use Ubuntu
-# 24.04's system GCC (13) rather than a newer GCC from an external PPA.
 ExtraArgsBefore:
-  - '-Wno-builtin-macro-redefined'
-  - '-D__cpp_concepts=202002L'
+  - "-Wno-builtin-macro-redefined"
+  - "-D__cpp_concepts=202002L"

@@ -28,12 +28,12 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang-18 clang-tidy-18 libssl-dev nlohmann-json3-dev
+          sudo apt-get install -y clang-19 clang-tidy-19 libssl-dev nlohmann-json3-dev
 
       - name: Configure
         run: |
           cmake -B build \
-            -DCMAKE_CXX_COMPILER=clang++-18 \
+            -DCMAKE_CXX_COMPILER=clang++-19 \
             -DCMAKE_BUILD_TYPE=Debug \
             -DENABLE_CLANG_TIDY=ON
 
@@ -49,7 +49,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y g++-13 libssl-dev nlohmann-json3-dev
+          sudo apt-get install -y g++-15 libssl-dev nlohmann-json3-dev
 
       - name: Cache CMake build
         uses: actions/cache@v4
@@ -60,7 +60,7 @@ jobs:
             ${{ runner.os }}-cmake-
 
       - name: Configure
-        run: cmake -B build -DCMAKE_CXX_COMPILER=g++-13 -DCMAKE_BUILD_TYPE=Release
+        run: cmake -B build -DCMAKE_CXX_COMPILER=g++-15 -DCMAKE_BUILD_TYPE=Release
         env:
           CXX: g++-13
 

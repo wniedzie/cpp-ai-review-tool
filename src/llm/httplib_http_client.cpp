@@ -1,5 +1,6 @@
 #include "llm/httplib_http_client.hpp"
 
+#include <algorithm>
 #include <string>
 #include <string_view>
 
@@ -27,9 +28,9 @@ std::optional<HttpResponse> HttplibSslClient::post(
     client.enable_server_certificate_verification(true);
 
     httplib::Headers httplib_headers;
-    for (const auto& [name, value] : headers) {
-        httplib_headers.emplace(name, value);
-    }
+    std::ranges::for_each(headers, [&](const HttpHeader& header) {
+        httplib_headers.emplace(header.name, header.value);
+    });
 
     const auto result =
         client.Post(std::string{path}, httplib_headers, body, std::string{content_type});
