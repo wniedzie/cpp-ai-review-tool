@@ -68,6 +68,39 @@ Two GitHub Actions workflows run automatically:
 
 **`.github/workflows/main.yml`** — runs on every push to `main` with the same three jobs.
 
+## Configuration
+
+The tool resolves configuration by merging four sources in descending priority:
+
+1. **CLI flags** (highest priority)
+2. **Environment variables** — `ANTHROPIC_API_KEY`, `CPP_REVIEW_MODEL`
+3. **Config file** — `.cpp-review.json` in the current working directory (or an explicit path)
+4. **Built-in defaults** (lowest priority)
+
+### Config file (`.cpp-review.json`)
+
+```json
+{
+  "checks": ["ub", "memory", "modernization"],
+  "fail_on": ["high", "critical"],
+  "output_format": "markdown",
+  "output_file": "review.md",
+  "dry_run": false,
+  "no_telemetry_warning": false,
+  "excluded_paths": ["build/", "third_party/"]
+}
+```
+
+| Field                  | Values                                      | Description                                        |
+| ---------------------- | ------------------------------------------- | -------------------------------------------------- |
+| `checks`               | `ub`, `memory`, `modernization`             | Check categories to run                            |
+| `fail_on`              | `info`, `low`, `medium`, `high`, `critical` | Exit non-zero if any finding reaches this severity |
+| `output_format`        | `markdown`, `json`, `sarif`                 | Output format                                      |
+| `output_file`          | file path string                            | Write output to file instead of stdout             |
+| `dry_run`              | `true` / `false`                            | Skip LLM calls (no API key required)               |
+| `no_telemetry_warning` | `true` / `false`                            | Suppress telemetry notice                          |
+| `excluded_paths`       | array of path strings                       | Paths to exclude from review                       |
+
 ## Project Structure
 
 ```
@@ -85,6 +118,9 @@ Two GitHub Actions workflows run automatically:
 │   │   └── cli_args.hpp            # CLI argument types and parse_args()
 │   ├── core/
 │   │   └── hash.hpp                # FNV-1a compile-time hash utility
+│   ├── config/
+│   │   ├── config.hpp          # Config types: CliArgs, Config, enums, ConfigError
+│   │   └── config_loader.hpp   # ConfigLoader — merges CLI, env, file, defaults
 │   └── llm/
 │       ├── llm_client.hpp          # Abstract LLM client interface
 │       ├── llm_request.hpp
@@ -98,6 +134,8 @@ Two GitHub Actions workflows run automatically:
 │   ├── main.cpp
 │   ├── cli/
 │   │   └── cli_args.cpp            # CLI11-based argument parsing
+│   ├── config/
+│   │   └── config_loader.cpp
 │   └── llm/
 │       ├── claude_llm_client.cpp
 │       ├── httplib_http_client.cpp
@@ -109,4 +147,11 @@ Two GitHub Actions workflows run automatically:
 │   │   └── test_make_claude_client.cpp
 │   └── integration/
 │       └── test_claude_llm_client_integration.cpp
+└── tests/
+    ├── unit/
+    │   ├── test_claude_llm_client.cpp
+    │   ├── test_config_loader.cpp
+    │   └── test_make_claude_client.cpp
+    └── integration/
+        └── test_claude_llm_client_integration.cpp
 ```
