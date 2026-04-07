@@ -38,6 +38,7 @@ cpp-review [OPTIONS] path
 | `--fail-on <list>`       | `high,critical`           | Severity levels that cause exit code 1                |
 | `--format <fmt>`         | `markdown`                | Output format: `markdown`, `json`, `sarif`            |
 | `--output <file>`        | _(stdout)_                | Write output to file instead of stdout                |
+| `--config <file>`        | `.cpp-review.json`        | Path to configuration file                            |
 | `--dry-run`              |                           | Estimate token count and cost without calling the API |
 | `--no-telemetry-warning` |                           | Suppress the one-time privacy notice                  |
 | `--version`              |                           | Print version and exit                                |
