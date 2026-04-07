@@ -1,0 +1,16 @@
+{
+    "checks": [
+        "ub",
+        "memory",
+        "modernization"
+    ],
+    "fail_on": [
+        "high",
+        "critical"
+    ],
+    "exclude": [
+        "build/",
+        "third_party/",
+        "tests/"
+    ]
+}

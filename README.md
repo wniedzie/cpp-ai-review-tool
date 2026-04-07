@@ -109,6 +109,8 @@ The tool resolves configuration by merging four sources in descending priority:
 ├── .clang-tidy
 ├── .clangd
 ├── CMakeLists.txt
+├── configuration/
+│   └── .cpp-review.json        # Example config file
 ├── .github/
 │   └── workflows/
 │       ├── pr.yml              # PR check: formatting + clang-tidy + build + test
@@ -117,7 +119,8 @@ The tool resolves configuration by merging four sources in descending priority:
 │   ├── cli/
 │   │   └── cli_args.hpp            # CLI argument types and parse_args()
 │   ├── core/
-│   │   └── hash.hpp                # FNV-1a compile-time hash utility
+│   │   ├── hash.hpp                # FNV-1a compile-time hash utility
+│   │   └── types.hpp               # Core enums: CheckCategory, Severity, OutputFormat
 │   ├── config/
 │   │   ├── config.hpp          # Config types: CliArgs, Config, enums, ConfigError
 │   │   └── config_loader.hpp   # ConfigLoader — merges CLI, env, file, defaults
