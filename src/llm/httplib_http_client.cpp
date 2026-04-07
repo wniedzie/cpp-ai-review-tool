@@ -16,10 +16,10 @@ HttplibSslClient::HttplibSslClient(
     , m_timeout{timeout} {}
 
 std::optional<HttpResponse> HttplibSslClient::post(
-    const std::string_view         path,
+    const std::string_view path,
     const std::vector<HttpHeader>& headers,
-    const std::string&             body,
-    const std::string_view         content_type
+    const std::string& body,
+    const std::string_view content_type
 ) {
 
     httplib::SSLClient client{m_host, m_port};

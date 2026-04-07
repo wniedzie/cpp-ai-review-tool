@@ -80,6 +80,7 @@ endif()
 
 # ── Core library ──────────────────────────────────────────────────────────────
 add_library(cpp_review_lib STATIC
+    src/config/config_loader.cpp
     src/llm/rate_limited_llm_client.cpp
     src/llm/claude_llm_client.cpp
     src/llm/httplib_http_client.cpp

@@ -38,6 +38,7 @@ cpp-review [OPTIONS] path
 | `--fail-on <list>`       | `high,critical`           | Severity levels that cause exit code 1                |
 | `--format <fmt>`         | `markdown`                | Output format: `markdown`, `json`, `sarif`            |
 | `--output <file>`        | _(stdout)_                | Write output to file instead of stdout                |
+| `--config <file>`        | `.cpp-review.json`        | Path to configuration file                            |
 | `--dry-run`              |                           | Estimate token count and cost without calling the API |
 | `--no-telemetry-warning` |                           | Suppress the one-time privacy notice                  |
 | `--version`              |                           | Print version and exit                                |
@@ -63,10 +64,43 @@ Two GitHub Actions workflows run automatically:
 **`.github/workflows/pr.yml`** — runs on every pull request targeting `main`:
 
 - **Clang-Format** — enforces formatting with `clang-format-15`
-- **Clang-Tidy** — configures with `clang++-18` and `-DENABLE_CLANG_TIDY=ON`, treats all warnings as errors
-- **Build & Test** — configures with `g++-13`, builds, and runs unit tests via CTest
+- **Clang-Tidy** — configures with `clang++-19` and `-DENABLE_CLANG_TIDY=ON`, treats all warnings as errors
+- **Build & Test** — configures with `g++-15`, builds, and runs unit tests via CTest
 
 **`.github/workflows/main.yml`** — runs on every push to `main` with the same three jobs.
+
+## Configuration
+
+The tool resolves configuration by merging four sources in descending priority:
+
+1. **CLI flags** (highest priority)
+2. **Environment variables** — `ANTHROPIC_API_KEY`, `CPP_REVIEW_MODEL`
+3. **Config file** — `.cpp-review.json` in the current working directory (or an explicit path)
+4. **Built-in defaults** (lowest priority)
+
+### Config file (`.cpp-review.json`)
+
+```json
+{
+  "checks": ["ub", "memory", "modernization"],
+  "fail_on": ["high", "critical"],
+  "output_format": "markdown",
+  "output_file": "review.md",
+  "dry_run": false,
+  "no_telemetry_warning": false,
+  "excluded_paths": ["build/", "third_party/"]
+}
+```
+
+| Field                  | Values                                      | Description                                        |
+| ---------------------- | ------------------------------------------- | -------------------------------------------------- |
+| `checks`               | `ub`, `memory`, `modernization`             | Check categories to run                            |
+| `fail_on`              | `info`, `low`, `medium`, `high`, `critical` | Exit non-zero if any finding reaches this severity |
+| `output_format`        | `markdown`, `json`, `sarif`                 | Output format                                      |
+| `output_file`          | file path string                            | Write output to file instead of stdout             |
+| `dry_run`              | `true` / `false`                            | Skip LLM calls (no API key required)               |
+| `no_telemetry_warning` | `true` / `false`                            | Suppress telemetry notice                          |
+| `excluded_paths`       | array of path strings                       | Paths to exclude from review                       |
 
 ## Project Structure
 
@@ -76,6 +110,8 @@ Two GitHub Actions workflows run automatically:
 ├── .clang-tidy
 ├── .clangd
 ├── CMakeLists.txt
+├── configuration/
+│   └── .cpp-review.json        # Example config file
 ├── .github/
 │   └── workflows/
 │       ├── pr.yml              # PR check: formatting + clang-tidy + build + test
@@ -84,7 +120,11 @@ Two GitHub Actions workflows run automatically:
 │   ├── cli/
 │   │   └── cli_args.hpp            # CLI argument types and parse_args()
 │   ├── core/
-│   │   └── hash.hpp                # FNV-1a compile-time hash utility
+│   │   ├── hash.hpp                # FNV-1a compile-time hash utility
+│   │   └── types.hpp               # Core enums: CheckCategory, Severity, OutputFormat
+│   ├── config/
+│   │   ├── config.hpp          # Config types: CliArgs, Config, enums, ConfigError
+│   │   └── config_loader.hpp   # ConfigLoader — merges CLI, env, file, defaults
 │   └── llm/
 │       ├── llm_client.hpp          # Abstract LLM client interface
 │       ├── llm_request.hpp
@@ -98,15 +138,18 @@ Two GitHub Actions workflows run automatically:
 │   ├── main.cpp
 │   ├── cli/
 │   │   └── cli_args.cpp            # CLI11-based argument parsing
+│   ├── config/
+│   │   └── config_loader.cpp
 │   └── llm/
 │       ├── claude_llm_client.cpp
 │       ├── httplib_http_client.cpp
 │       └── rate_limited_llm_client.cpp
-├── tests/
-│   ├── unit/
-│   │   ├── test_cli_args.cpp
-│   │   ├── test_claude_llm_client.cpp
-│   │   └── test_make_claude_client.cpp
-│   └── integration/
-│       └── test_claude_llm_client_integration.cpp
+└── tests/
+    ├── unit/
+    │   ├── test_cli_args.cpp
+    │   ├── test_claude_llm_client.cpp
+    │   ├── test_config_loader.cpp
+    │   └── test_make_claude_client.cpp
+    └── integration/
+        └── test_claude_llm_client_integration.cpp
 ```

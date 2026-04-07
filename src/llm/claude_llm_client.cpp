@@ -19,11 +19,11 @@ namespace llm {
 
 namespace {
 
-constexpr std::string_view     api_host           = "api.anthropic.com";
-constexpr std::string_view     api_path           = "/v1/messages";
-constexpr std::string_view     api_version        = "2023-06-01";
-constexpr std::string_view     default_model      = "claude-sonnet-4-6";
-constexpr std::uint32_t        default_max_tokens = 4096;
+constexpr std::string_view api_host = "api.anthropic.com";
+constexpr std::string_view api_path = "/v1/messages";
+constexpr std::string_view api_version = "2023-06-01";
+constexpr std::string_view default_model = "claude-sonnet-4-6";
+constexpr std::uint32_t default_max_tokens = 4096;
 constexpr std::chrono::seconds request_timeout{30};
 
 // Validates an API key against the character set used by Anthropic keys
@@ -67,16 +67,16 @@ constexpr std::chrono::seconds request_timeout{30};
 
 [[nodiscard]] std::expected<LlmResponse, LlmError> parse_response_body(const std::string& body) {
     try {
-        const auto  json    = nlohmann::json::parse(body);
+        const auto json = nlohmann::json::parse(body);
         const auto& content = json.at("content");
         if (content.empty()) {
             return std::unexpected{LlmError::ParseError};
         }
         const auto& usage = json.at("usage");
         return LlmResponse{
-            .content       = content.at(0).at("text").get<std::string>(),
-            .stop_reason   = json.at("stop_reason").get<std::string>(),
-            .input_tokens  = usage.at("input_tokens").get<std::uint32_t>(),
+            .content = content.at(0).at("text").get<std::string>(),
+            .stop_reason = json.at("stop_reason").get<std::string>(),
+            .input_tokens = usage.at("input_tokens").get<std::uint32_t>(),
             .output_tokens = usage.at("output_tokens").get<std::uint32_t>()};
     } catch (const nlohmann::json::exception&) {
         return std::unexpected{LlmError::ParseError};
@@ -120,7 +120,7 @@ ClaudeLlmClient::ClaudeLlmClient(
 
 std::expected<LlmResponse, LlmError> ClaudeLlmClient::complete(const LlmRequest& request) {
     const std::string& effective_model = request.model.has_value() ? *request.model : m_model;
-    const auto         body            = build_request_body(request, effective_model);
+    const auto body = build_request_body(request, effective_model);
     return send_request(*m_http_client, body, m_api_key);
 }
 
@@ -139,9 +139,9 @@ std::expected<ClaudeLlmClient, LlmError> make_claude_client() {
     }
 
     const auto* const model_env = std::getenv("CPP_REVIEW_MODEL");
-    auto              model     = (model_env != nullptr && !std::string_view{model_env}.empty())
-                                      ? std::string{model_env}
-                                      : std::string{default_model};
+    auto model = (model_env != nullptr && !std::string_view{model_env}.empty())
+                     ? std::string{model_env}
+                     : std::string{default_model};
 
     return ClaudeLlmClient{std::string{api_key_env}, std::move(model)};
 }

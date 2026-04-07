@@ -25,7 +25,7 @@ std::expected<LlmResponse, LlmError> RateLimitedLlmClient::complete(const LlmReq
     {
         const std::lock_guard lock{m_mutex};
 
-        const auto now     = std::chrono::steady_clock::now();
+        const auto now = std::chrono::steady_clock::now();
         const auto elapsed = std::chrono::duration<double>(now - m_last_refill).count();
 
         m_available_tokens = std::min(

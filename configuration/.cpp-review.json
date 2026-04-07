@@ -1,0 +1,19 @@
+{
+    "checks": [
+        "ub",
+        "memory",
+        "modernization"
+    ],
+    "fail_on": [
+        "high",
+        "critical"
+    ],
+    "output_format": "markdown",
+    "dry_run": false,
+    "no_telemetry_warning": false,
+    "excluded_paths": [
+        "build/",
+        "third_party/",
+        "tests/"
+    ]
+}

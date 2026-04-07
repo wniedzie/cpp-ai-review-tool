@@ -17,10 +17,10 @@ public:
     [[nodiscard]] virtual std::expected<LlmResponse, LlmError> complete(const LlmRequest& request
     ) = 0;
 
-    LlmClient(const LlmClient&)            = delete;
+    LlmClient(const LlmClient&) = delete;
     LlmClient& operator=(const LlmClient&) = delete;
-    LlmClient(LlmClient&&) noexcept        = default;  // needed so derived classes stay movable
-    LlmClient& operator=(LlmClient&&)      = delete;
+    LlmClient(LlmClient&&) noexcept = default;  // needed so derived classes stay movable
+    LlmClient& operator=(LlmClient&&) = delete;
 
 protected:
     LlmClient() = default;

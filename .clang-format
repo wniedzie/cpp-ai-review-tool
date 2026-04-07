@@ -43,10 +43,10 @@ ReferenceAlignment: Left
 
 # ── Alignment ────────────────────────────────────────────────────────────────
 AlignAfterOpenBracket: BlockIndent
-AlignConsecutiveAssignments: Consecutive
-AlignConsecutiveDeclarations: Consecutive
+AlignConsecutiveAssignments: None
+AlignConsecutiveDeclarations: None
 AlignOperands: Align
-AlignTrailingComments: true
+AlignTrailingComments: false
 
 # ── Includes ─────────────────────────────────────────────────────────────────
 SortIncludes: CaseInsensitive

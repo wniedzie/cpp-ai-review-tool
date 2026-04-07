@@ -61,8 +61,6 @@ jobs:
 
       - name: Configure
         run: cmake -B build -DCMAKE_CXX_COMPILER=g++-15 -DCMAKE_BUILD_TYPE=Release
-        env:
-          CXX: g++-13
 
       - name: Build
         run: cmake --build build --parallel $(nproc)

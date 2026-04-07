@@ -14,7 +14,7 @@ struct HttpHeader {
 };
 
 struct HttpResponse {
-    int         status{};
+    int status{};
     std::string body;
 };
 
@@ -25,16 +25,16 @@ public:
     virtual ~IHttpClient() = default;
 
     [[nodiscard]] virtual std::optional<HttpResponse> post(
-        std::string_view               path,
+        std::string_view path,
         const std::vector<HttpHeader>& headers,
-        const std::string&             body,
-        std::string_view               content_type
+        const std::string& body,
+        std::string_view content_type
     ) = 0;
 
-    IHttpClient(const IHttpClient&)            = delete;
+    IHttpClient(const IHttpClient&) = delete;
     IHttpClient& operator=(const IHttpClient&) = delete;
-    IHttpClient(IHttpClient&&)                 = delete;
-    IHttpClient& operator=(IHttpClient&&)      = delete;
+    IHttpClient(IHttpClient&&) = delete;
+    IHttpClient& operator=(IHttpClient&&) = delete;
 
 protected:
     IHttpClient() = default;
