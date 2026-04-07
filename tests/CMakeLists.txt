@@ -1,4 +1,5 @@
 add_executable(unit_tests
+    unit/test_config_loader.cpp
     unit/test_make_claude_client.cpp
     unit/test_claude_llm_client.cpp
     unit/test_cli_args.cpp
