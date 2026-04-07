@@ -13,7 +13,8 @@ Checks: >
   -cppcoreguidelines-avoid-magic-numbers,
   -bugprone-easily-swappable-parameters,
   -performance-unnecessary-value-param,
-  -cppcoreguidelines-non-private-member-variables-in-classes
+  -cppcoreguidelines-non-private-member-variables-in-classes,
+  -readability-braces-around-statements
 
 WarningsAsErrors: "*"
 
