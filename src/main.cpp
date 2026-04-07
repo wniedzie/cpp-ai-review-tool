@@ -11,8 +11,7 @@ int main(int argc, char* argv[]) {
         return 2;
     }
 
-    const auto cfg = config::ConfigLoader::load(
-        cli::to_config_args(*args), args->config_file);
+    const auto cfg = config::ConfigLoader::load(cli::to_config_args(*args), args->config_file);
     if (!cfg) {
         std::cerr << "error: " << config::to_string(cfg.error()) << '\n';
         return 2;

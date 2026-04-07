@@ -12,8 +12,8 @@
 namespace config {
 
 using core::CheckCategory;
-using core::Severity;
 using core::OutputFormat;
+using core::Severity;
 using core::to_string;
 
 enum class ConfigError : std::uint8_t {

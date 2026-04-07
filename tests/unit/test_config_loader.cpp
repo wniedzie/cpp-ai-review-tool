@@ -1,3 +1,4 @@
+#include <atomic>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
@@ -45,12 +46,42 @@ private:
     std::optional<std::string> m_previous;
 };
 
-// Writes content to a temp file and returns its path.
-[[nodiscard]] std::filesystem::path write_temp_json(const std::string& content) {
-    auto path = std::filesystem::temp_directory_path() / "cpp_review_test_config.json";
-    std::ofstream{path} << content;
-    return path;
-}
+// RAII guard that writes content to a uniquely-named temp file and removes it
+// on destruction. Unique names are derived from the process ID and a
+// per-process monotonic counter, so parallel test processes never collide.
+class TempJsonFile {
+public:
+    explicit TempJsonFile(const std::string& content) {
+        static std::atomic<unsigned> counter{0};
+        const auto filename = "cpp_review_test_" + std::to_string(::getpid()) + "_" +
+                              std::to_string(counter.fetch_add(1, std::memory_order_relaxed)) +
+                              ".json";
+        m_path = std::filesystem::temp_directory_path() / filename;
+        std::ofstream{m_path} << content;
+    }
+
+    ~TempJsonFile() {
+        std::filesystem::remove(m_path);
+    }
+
+    TempJsonFile(const TempJsonFile&) = delete;
+    TempJsonFile& operator=(const TempJsonFile&) = delete;
+    TempJsonFile(TempJsonFile&&) = delete;
+    TempJsonFile& operator=(TempJsonFile&&) = delete;
+
+    [[nodiscard]] const std::filesystem::path& path() const noexcept {
+        return m_path;
+    }
+
+    // Implicit conversion so existing call-sites that pass the result directly
+    // to ConfigLoader::load(cli, path) continue to compile without changes.
+    operator const std::filesystem::path&() const noexcept {
+        return m_path;
+    }
+
+private:
+    std::filesystem::path m_path;
+};
 
 // ─── Default config ───────────────────────────────────────────────────────────
 
@@ -185,10 +216,10 @@ TEST(ConfigLoaderTest, CliInputPathsPassedThrough) {
 
 TEST(ConfigLoaderTest, JsonConfigLoadsChecks) {
     const EnvGuard _key{"ANTHROPIC_API_KEY", "test-key"};
-    const auto path = write_temp_json(R"({"checks": ["memory"]})");
+    const TempJsonFile tmp{R"({"checks": ["memory"]})"};
     const CliArgs cli{};
 
-    const auto result = ConfigLoader::load(cli, path);
+    const auto result = ConfigLoader::load(cli, tmp);
 
     ASSERT_TRUE(result.has_value());
     EXPECT_THAT(result->checks, ElementsAre(CheckCategory::memory));
@@ -196,10 +227,10 @@ TEST(ConfigLoaderTest, JsonConfigLoadsChecks) {
 
 TEST(ConfigLoaderTest, JsonConfigLoadsFailOn) {
     const EnvGuard _key{"ANTHROPIC_API_KEY", "test-key"};
-    const auto path = write_temp_json(R"({"fail_on": ["critical"]})");
+    const TempJsonFile tmp{R"({"fail_on": ["critical"]})"};
     const CliArgs cli{};
 
-    const auto result = ConfigLoader::load(cli, path);
+    const auto result = ConfigLoader::load(cli, tmp);
 
     ASSERT_TRUE(result.has_value());
     EXPECT_THAT(result->fail_on, ElementsAre(Severity::critical));
@@ -207,21 +238,86 @@ TEST(ConfigLoaderTest, JsonConfigLoadsFailOn) {
 
 TEST(ConfigLoaderTest, JsonConfigLoadsExcludedPaths) {
     const EnvGuard _key{"ANTHROPIC_API_KEY", "test-key"};
-    const auto path = write_temp_json(R"({"exclude": ["build/", "third_party/"]})");
+    const TempJsonFile tmp{R"({"excluded_paths": ["build/", "third_party/"]})"};
     const CliArgs cli{};
 
-    const auto result = ConfigLoader::load(cli, path);
+    const auto result = ConfigLoader::load(cli, tmp);
 
     ASSERT_TRUE(result.has_value());
     EXPECT_THAT(result->excluded_paths, ElementsAre("build/", "third_party/"));
 }
 
+TEST(ConfigLoaderTest, JsonConfigLoadsOutputFormat) {
+    const EnvGuard _key{"ANTHROPIC_API_KEY", "test-key"};
+    const TempJsonFile tmp{R"({"output_format": "json"})"};
+    const CliArgs cli{};
+
+    const auto result = ConfigLoader::load(cli, tmp);
+
+    ASSERT_TRUE(result.has_value());
+    EXPECT_EQ(result->output_format, OutputFormat::json);
+}
+
+TEST(ConfigLoaderTest, JsonConfigLoadsOutputFile) {
+    const EnvGuard _key{"ANTHROPIC_API_KEY", "test-key"};
+    const TempJsonFile tmp{R"({"output_file": "review.md"})"};
+    const CliArgs cli{};
+
+    const auto result = ConfigLoader::load(cli, tmp);
+
+    ASSERT_TRUE(result.has_value());
+    EXPECT_EQ(result->output_file, std::make_optional<std::string>("review.md"));
+}
+
+TEST(ConfigLoaderTest, JsonConfigLoadsDryRun) {
+    const EnvGuard _key{"ANTHROPIC_API_KEY", ""};
+    const TempJsonFile tmp{R"({"dry_run": true})"};
+    const CliArgs cli{};
+
+    const auto result = ConfigLoader::load(cli, tmp);
+
+    ASSERT_TRUE(result.has_value());
+    EXPECT_TRUE(result->dry_run);
+}
+
+TEST(ConfigLoaderTest, JsonConfigLoadsNoTelemetryWarning) {
+    const EnvGuard _key{"ANTHROPIC_API_KEY", "test-key"};
+    const TempJsonFile tmp{R"({"no_telemetry_warning": true})"};
+    const CliArgs cli{};
+
+    const auto result = ConfigLoader::load(cli, tmp);
+
+    ASSERT_TRUE(result.has_value());
+    EXPECT_TRUE(result->no_telemetry_warning);
+}
+
+TEST(ConfigLoaderTest, InvalidOutputFormatInJsonReturnsError) {
+    const TempJsonFile tmp{R"({"output_format": "xml"})"};
+    const CliArgs cli{.dry_run = true};
+
+    const auto result = ConfigLoader::load(cli, tmp);
+
+    ASSERT_FALSE(result.has_value());
+    EXPECT_EQ(result.error(), ConfigError::invalid_output_format);
+}
+
+TEST(ConfigLoaderTest, CliOutputFormatOverridesJsonConfig) {
+    const EnvGuard _key{"ANTHROPIC_API_KEY", "test-key"};
+    const TempJsonFile tmp{R"({"output_format": "json"})"};
+    const CliArgs cli{.output_format = OutputFormat::sarif};
+
+    const auto result = ConfigLoader::load(cli, tmp);
+
+    ASSERT_TRUE(result.has_value());
+    EXPECT_EQ(result->output_format, OutputFormat::sarif);  // CLI wins
+}
+
 TEST(ConfigLoaderTest, CliChecksOverrideJsonConfig) {
     const EnvGuard _key{"ANTHROPIC_API_KEY", "test-key"};
-    const auto path = write_temp_json(R"({"checks": ["memory"]})");
+    const TempJsonFile tmp{R"({"checks": ["memory"]})"};
     const CliArgs cli{.checks = {{CheckCategory::ub}}};
 
-    const auto result = ConfigLoader::load(cli, path);
+    const auto result = ConfigLoader::load(cli, tmp);
 
     ASSERT_TRUE(result.has_value());
     EXPECT_THAT(result->checks, ElementsAre(CheckCategory::ub));  // CLI wins
@@ -230,30 +326,30 @@ TEST(ConfigLoaderTest, CliChecksOverrideJsonConfig) {
 // ─── JSON config file — error cases ──────────────────────────────────────────
 
 TEST(ConfigLoaderTest, InvalidJsonReturnsParseError) {
-    const auto path = write_temp_json("not valid json {{{");
+    const TempJsonFile tmp{"not valid json {{{"};
     const CliArgs cli{.dry_run = true};
 
-    const auto result = ConfigLoader::load(cli, path);
+    const auto result = ConfigLoader::load(cli, tmp);
 
     ASSERT_FALSE(result.has_value());
     EXPECT_EQ(result.error(), ConfigError::parse_error);
 }
 
 TEST(ConfigLoaderTest, InvalidCheckCategoryInJsonReturnsError) {
-    const auto path = write_temp_json(R"({"checks": ["unknown_category"]})");
+    const TempJsonFile tmp{R"({"checks": ["unknown_category"]})"};
     const CliArgs cli{.dry_run = true};
 
-    const auto result = ConfigLoader::load(cli, path);
+    const auto result = ConfigLoader::load(cli, tmp);
 
     ASSERT_FALSE(result.has_value());
     EXPECT_EQ(result.error(), ConfigError::invalid_check_category);
 }
 
 TEST(ConfigLoaderTest, InvalidSeverityInJsonReturnsError) {
-    const auto path = write_temp_json(R"({"fail_on": ["ultra"]})");
+    const TempJsonFile tmp{R"({"fail_on": ["ultra"]})"};
     const CliArgs cli{.dry_run = true};
 
-    const auto result = ConfigLoader::load(cli, path);
+    const auto result = ConfigLoader::load(cli, tmp);
 
     ASSERT_FALSE(result.has_value());
     EXPECT_EQ(result.error(), ConfigError::invalid_severity);

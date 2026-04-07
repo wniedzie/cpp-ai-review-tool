@@ -9,36 +9,12 @@
 
 #include <nlohmann/json.hpp>
 
-#include "core/hash.hpp"
+#include "core/types.hpp"
 
 namespace config {
 
 namespace {
 using namespace core;
-
-// ─── String → enum parsers (internal to this translation unit) ───────────────
-
-[[nodiscard]] constexpr std::optional<CheckCategory> parse_check_category(std::string_view category
-) noexcept {
-    switch (hash(category)) {
-        case "ub"_h: return CheckCategory::ub;
-        case "memory"_h: return CheckCategory::memory;
-        case "modernization"_h: return CheckCategory::modernization;
-        default: return std::nullopt;
-    }
-}
-
-[[nodiscard]] constexpr std::optional<Severity> parse_severity(std::string_view severity) noexcept {
-    switch (hash(severity)) {
-        case "info"_h: return Severity::info;
-        case "low"_h: return Severity::low;
-        case "medium"_h: return Severity::medium;
-        case "high"_h: return Severity::high;
-        case "critical"_h: return Severity::critical;
-        default: return std::nullopt;
-    }
-    return std::nullopt;
-}
 
 // ─── JSON file reading ────────────────────────────────────────────────────────
 
@@ -80,7 +56,7 @@ apply_json_config(Config& cfg, const nlohmann::json& json) {
         for (const auto& item : json["checks"]) {
             if (!item.is_string())
                 return std::unexpected(ConfigError::invalid_check_category);
-            const auto cat = parse_check_category(item.get<std::string>());
+            const auto cat = from_string<CheckCategory>(item.get<std::string>());
             if (!cat)
                 return std::unexpected(ConfigError::invalid_check_category);
             checks.push_back(*cat);
@@ -93,7 +69,7 @@ apply_json_config(Config& cfg, const nlohmann::json& json) {
         for (const auto& item : json["fail_on"]) {
             if (!item.is_string())
                 return std::unexpected(ConfigError::invalid_severity);
-            const auto sev = parse_severity(item.get<std::string>());
+            const auto sev = from_string<Severity>(item.get<std::string>());
             if (!sev)
                 return std::unexpected(ConfigError::invalid_severity);
             severities.push_back(*sev);
@@ -101,8 +77,24 @@ apply_json_config(Config& cfg, const nlohmann::json& json) {
         cfg.fail_on = std::move(severities);
     }
 
-    if (json.contains("exclude") && json["exclude"].is_array()) {
-        for (const auto& item : json["exclude"]) {
+    if (json.contains("output_format") && json["output_format"].is_string()) {
+        const auto fmt = from_string<OutputFormat>(json["output_format"].get<std::string>());
+        if (!fmt)
+            return std::unexpected(ConfigError::invalid_output_format);
+        cfg.output_format = *fmt;
+    }
+
+    if (json.contains("output_file") && json["output_file"].is_string())
+        cfg.output_file = json["output_file"].get<std::string>();
+
+    if (json.contains("dry_run") && json["dry_run"].is_boolean())
+        cfg.dry_run = json["dry_run"].get<bool>();
+
+    if (json.contains("no_telemetry_warning") && json["no_telemetry_warning"].is_boolean())
+        cfg.no_telemetry_warning = json["no_telemetry_warning"].get<bool>();
+
+    if (json.contains("excluded_paths") && json["excluded_paths"].is_array()) {
+        for (const auto& item : json["excluded_paths"]) {
             if (item.is_string())
                 cfg.excluded_paths.push_back(item.get<std::string>());
         }
