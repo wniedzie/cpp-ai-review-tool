@@ -172,7 +172,11 @@ TEST_F(CliArgsTest, OutputFileIsSet) {
 
     ASSERT_TRUE(result.has_value());
     ASSERT_TRUE(result->output_file.has_value());
-    EXPECT_EQ(*result->output_file, std::filesystem::path{"out.md"});
+    if (result) {
+        EXPECT_EQ(*result->output_file, std::filesystem::path{"out.md"});
+    } else {
+        FAIL() << "Expected parsing to succeed, but it failed with error: " << result.error();
+    }
 }
 
 // ── --dry-run ─────────────────────────────────────────────────────────────────
