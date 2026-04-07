@@ -7,8 +7,8 @@
 namespace llm {
 
 struct LlmResponse {
-    std::string   content;
-    std::string   stop_reason;     // "end_turn", "max_tokens", or "stop_sequence"
+    std::string content;
+    std::string stop_reason;  // "end_turn", "max_tokens", or "stop_sequence"
     std::uint32_t input_tokens{};  // reported by API; used for rate-limiting and dry-run cost
     std::uint32_t output_tokens{};
 };

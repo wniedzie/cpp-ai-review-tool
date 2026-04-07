@@ -23,8 +23,8 @@ public:
     [[nodiscard]] std::expected<LlmResponse, LlmError> complete(const LlmRequest& request) override;
 
 private:
-    std::string                  m_api_key;
-    std::string                  m_model;
+    std::string m_api_key;
+    std::string m_model;
     std::unique_ptr<IHttpClient> m_http_client{nullptr};
 };
 

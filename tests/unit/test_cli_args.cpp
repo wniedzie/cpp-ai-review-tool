@@ -42,7 +42,7 @@ struct Argv {
 class CliArgsTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        const auto*       info        = ::testing::UnitTest::GetInstance()->current_test_info();
+        const auto* info = ::testing::UnitTest::GetInstance()->current_test_info();
         const std::string unique_name = std::string("cpp_review_") + info->test_suite_name() + "_" +
                                         info->name() + "_" + std::to_string(getpid()) + ".cpp";
         temp_file_ = std::filesystem::temp_directory_path() / unique_name;

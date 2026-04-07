@@ -17,15 +17,15 @@ public:
     explicit HttplibSslClient(std::string_view host, int port, std::chrono::seconds timeout);
 
     [[nodiscard]] std::optional<HttpResponse> post(
-        std::string_view               path,
+        std::string_view path,
         const std::vector<HttpHeader>& headers,
-        const std::string&             body,
-        std::string_view               content_type
+        const std::string& body,
+        std::string_view content_type
     ) override;
 
 private:
-    std::string          m_host;
-    int                  m_port;
+    std::string m_host;
+    int m_port;
     std::chrono::seconds m_timeout;
 };
 

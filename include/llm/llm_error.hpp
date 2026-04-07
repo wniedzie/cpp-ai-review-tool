@@ -7,12 +7,12 @@
 namespace llm {
 
 enum class LlmError : std::uint8_t {
-    AuthFailure,       // invalid or missing ANTHROPIC_API_KEY
-    RateLimited,       // HTTP 429 from API
-    NetworkError,      // connection failure or timeout
-    ParseError,        // malformed API response body
-    InvalidRequest,    // HTTP 400 — bad model name or malformed body
-    ContextTooLarge,   // input exceeds model context window
+    AuthFailure,  // invalid or missing ANTHROPIC_API_KEY
+    RateLimited,  // HTTP 429 from API
+    NetworkError,  // connection failure or timeout
+    ParseError,  // malformed API response body
+    InvalidRequest,  // HTTP 400 — bad model name or malformed body
+    ContextTooLarge,  // input exceeds model context window
     ServerOverloaded,  // HTTP 500 / 529 — retriable server error
     Unknown
 };

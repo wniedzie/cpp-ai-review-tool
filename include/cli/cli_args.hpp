@@ -46,13 +46,13 @@ enum class OutputFormat : std::uint8_t { markdown, json, sarif };
 }
 
 struct CliArgs {
-    std::filesystem::path                input_path;
-    std::set<CheckCategory>              checks;   // default: all three
-    std::set<Severity>                   fail_on;  // default: {high, critical}
-    OutputFormat                         format = OutputFormat::markdown;
+    std::filesystem::path input_path;
+    std::set<CheckCategory> checks;  // default: all three
+    std::set<Severity> fail_on;  // default: {high, critical}
+    OutputFormat format = OutputFormat::markdown;
     std::optional<std::filesystem::path> output_file;
-    bool                                 dry_run              = false;
-    bool                                 no_telemetry_warning = false;
+    bool dry_run = false;
+    bool no_telemetry_warning = false;
     std::optional<std::filesystem::path> config_file;  // reserved for FR-09
 };
 

@@ -8,7 +8,7 @@ namespace core {
 
 struct Fnv1aHash {
     static constexpr std::size_t offset = 2166136261U;
-    static constexpr std::size_t prime  = 16777619U;
+    static constexpr std::size_t prime = 16777619U;
 
     template <typename Iterator>
     constexpr std::size_t operator()(Iterator first, Iterator last) const noexcept {

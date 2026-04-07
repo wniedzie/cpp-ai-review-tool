@@ -47,7 +47,7 @@ TEST_F(ClaudeLlmClientIntegrationTest, RealApiReturnsSuccessfulResponse) {
 
     const LlmRequest request{
         .system_prompt = "You are a concise assistant. Reply with exactly one word.",
-        .user_content  = "Say the word: hello"};
+        .user_content = "Say the word: hello"};
 
     const auto result = client.complete(request);
 
@@ -63,7 +63,7 @@ TEST_F(ClaudeLlmClientIntegrationTest, RealApiWithInvalidKeyReturnsAuthFailure) 
     ClaudeLlmClient client{"invalid-key-but-valid-chars", "claude-sonnet-4-6"};
 
     const LlmRequest request{.system_prompt = "", .user_content = "ping"};
-    const auto       result = client.complete(request);
+    const auto result = client.complete(request);
 
     ASSERT_FALSE(result.has_value());
     EXPECT_EQ(result.error(), LlmError::AuthFailure);

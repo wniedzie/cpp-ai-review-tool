@@ -26,10 +26,10 @@ public:
     MOCK_METHOD(
         std::optional<HttpResponse>,
         post,
-        (std::string_view               path,
+        (std::string_view path,
          const std::vector<HttpHeader>& headers,
-         const std::string&             body,
-         std::string_view               content_type),
+         const std::string& body,
+         std::string_view content_type),
         (override)
     );
 };
@@ -40,10 +40,10 @@ namespace {
 
 // Minimal well-formed Anthropic API response body.
 std::string make_success_body(
-    const std::string& text     = "Hello",
-    const std::string& stop     = "end_turn",
-    std::uint32_t      in_toks  = 10,
-    std::uint32_t      out_toks = 5
+    const std::string& text = "Hello",
+    const std::string& stop = "end_turn",
+    std::uint32_t in_toks = 10,
+    std::uint32_t out_toks = 5
 ) {
     return nlohmann::json{
         {"content", {{{"type", "text"}, {"text", text}}}},
@@ -62,14 +62,14 @@ class ClaudeLlmClientTest : public ::testing::Test {
 protected:
     void SetUp() override {
         auto mock_owner = std::make_unique<MockHttpClient>();
-        mock_           = mock_owner.get();
+        mock_ = mock_owner.get();
         client_ =
             std::make_unique<ClaudeLlmClient>("valid-key", "test-model", std::move(mock_owner));
     }
 
     // unique_ptr avoids the need for move-assignment (which LlmClient deletes).
     std::unique_ptr<ClaudeLlmClient> client_;
-    MockHttpClient*                  mock_{nullptr};
+    MockHttpClient* mock_{nullptr};
 
     static LlmRequest minimal_request() {
         return LlmRequest{.system_prompt = "", .user_content = "Hello"};
@@ -105,9 +105,9 @@ TEST_F(ClaudeLlmClientTest, SystemPromptIncludedInBody) {
             return HttpResponse{.status = 200, .body = make_success_body()};
         });
 
-    LlmRequest request    = minimal_request();
+    LlmRequest request = minimal_request();
     request.system_prompt = "Act as a C++ expert.";
-    std::ignore           = client_->complete(request);
+    std::ignore = client_->complete(request);
 
     const auto json = nlohmann::json::parse(captured_body);
     EXPECT_TRUE(json.contains("system"));
@@ -143,16 +143,16 @@ TEST_F(ClaudeLlmClientTest, RequestModelOverridesClientModel) {
         });
 
     LlmRequest request = minimal_request();
-    request.model      = "claude-haiku";
-    std::ignore        = client_->complete(request);
+    request.model = "claude-haiku";
+    std::ignore = client_->complete(request);
 
     const auto json = nlohmann::json::parse(captured_body);
     EXPECT_EQ(json.at("model").get<std::string>(), "claude-haiku");
 }
 
 TEST_F(ClaudeLlmClientTest, ClientModelUsedWhenRequestModelAbsent) {
-    auto                             mock_owner = std::make_unique<MockHttpClient>();
-    auto*                            local_mock = mock_owner.get();
+    auto mock_owner = std::make_unique<MockHttpClient>();
+    auto* local_mock = mock_owner.get();
     std::unique_ptr<ClaudeLlmClient> client =
         std::make_unique<ClaudeLlmClient>("valid-key", "my-custom-model", std::move(mock_owner));
 
@@ -205,7 +205,7 @@ TEST_F(ClaudeLlmClientTest, MaxTokensCustomValue) {
 
     LlmRequest request = minimal_request();
     request.max_tokens = 100U;
-    std::ignore        = client_->complete(request);
+    std::ignore = client_->complete(request);
 
     const auto json = nlohmann::json::parse(captured_body);
     EXPECT_EQ(json.at("max_tokens").get<std::uint32_t>(), 100U);
@@ -214,8 +214,8 @@ TEST_F(ClaudeLlmClientTest, MaxTokensCustomValue) {
 // ─── Header assertions ────────────────────────────────────────────────────────
 
 TEST_F(ClaudeLlmClientTest, ApiKeyPassedInHeader) {
-    auto                             mock_owner = std::make_unique<MockHttpClient>();
-    auto*                            local_mock = mock_owner.get();
+    auto mock_owner = std::make_unique<MockHttpClient>();
+    auto* local_mock = mock_owner.get();
     std::unique_ptr<ClaudeLlmClient> client =
         std::make_unique<ClaudeLlmClient>("my-secret-key", "test-model", std::move(mock_owner));
 
@@ -278,7 +278,7 @@ TEST_F(ClaudeLlmClientTest, ContentTypeHeaderIsApplicationJson) {
 // TEST_P avoids code duplication across all error-status variants.
 
 struct HttpStatusMapping {
-    int      http_status;
+    int http_status;
     LlmError expected_error;
 };
 
@@ -286,13 +286,13 @@ class HttpStatusMappingTest : public ::testing::TestWithParam<HttpStatusMapping>
 protected:
     void SetUp() override {
         auto mock_owner = std::make_unique<MockHttpClient>();
-        mock_           = mock_owner.get();
+        mock_ = mock_owner.get();
         client_ =
             std::make_unique<ClaudeLlmClient>("valid-key", "test-model", std::move(mock_owner));
     }
 
     std::unique_ptr<ClaudeLlmClient> client_;
-    MockHttpClient*                  mock_{nullptr};
+    MockHttpClient* mock_{nullptr};
 };
 
 TEST_P(HttpStatusMappingTest, MapsHttpStatusToLlmError) {
@@ -336,13 +336,13 @@ class MalformedResponseBodyTest : public ::testing::TestWithParam<MalformedBodyC
 protected:
     void SetUp() override {
         auto mock_owner = std::make_unique<MockHttpClient>();
-        mock_           = mock_owner.get();
+        mock_ = mock_owner.get();
         client_ =
             std::make_unique<ClaudeLlmClient>("valid-key", "test-model", std::move(mock_owner));
     }
 
     std::unique_ptr<ClaudeLlmClient> client_;
-    MockHttpClient*                  mock_{nullptr};
+    MockHttpClient* mock_{nullptr};
 };
 
 TEST_P(MalformedResponseBodyTest, ReturnsParseError) {

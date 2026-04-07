@@ -143,7 +143,7 @@ std::expected<CliArgs, std::string> parse_args(int argc, const char* const* argv
 
     // Validate input path exists
     const std::filesystem::path input_path{input_path_str};
-    std::error_code             err;
+    std::error_code err;
     if (!std::filesystem::exists(input_path, err)) {
         if (err) {
             return std::unexpected(
@@ -172,11 +172,11 @@ std::expected<CliArgs, std::string> parse_args(int argc, const char* const* argv
     }
 
     CliArgs args;
-    args.input_path           = input_path;
-    args.checks               = *checks;
-    args.fail_on              = *fail_on;
-    args.format               = *format;
-    args.dry_run              = dry_run;
+    args.input_path = input_path;
+    args.checks = *checks;
+    args.fail_on = *fail_on;
+    args.format = *format;
+    args.dry_run = dry_run;
     args.no_telemetry_warning = no_telemetry_warning;
 
     if (!output_file_str.empty()) {

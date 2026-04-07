@@ -22,7 +22,8 @@ using ::testing::ElementsAre;
 // or set to a non-empty value before the guard was constructed.
 class EnvGuard {
 public:
-    EnvGuard(const char* name, const char* value) : m_name{name} {
+    EnvGuard(const char* name, const char* value)
+        : m_name{name} {
         if (const char* prev = std::getenv(name))
             m_previous = prev;
         setenv(name, value, /*overwrite=*/1);
@@ -34,11 +35,13 @@ public:
             unsetenv(m_name);
     }
 
-    EnvGuard(const EnvGuard&)            = delete;
+    EnvGuard(const EnvGuard&) = delete;
     EnvGuard& operator=(const EnvGuard&) = delete;
+    EnvGuard(EnvGuard&&) = delete;
+    EnvGuard& operator=(EnvGuard&&) = delete;
 
 private:
-    const char*                m_name;
+    const char* m_name;
     std::optional<std::string> m_previous;
 };
 
@@ -53,7 +56,7 @@ private:
 
 TEST(ConfigLoaderTest, DefaultsAppliedWhenDryRun) {
     const EnvGuard _key{"ANTHROPIC_API_KEY", ""};
-    const CliArgs  cli{.dry_run = true};
+    const CliArgs cli{.dry_run = true};
 
     const auto result = ConfigLoader::load(cli);
 
@@ -75,7 +78,7 @@ TEST(ConfigLoaderTest, DefaultsAppliedWhenDryRun) {
 
 TEST(ConfigLoaderTest, MissingApiKeyReturnsMissingApiKeyError) {
     const EnvGuard _key{"ANTHROPIC_API_KEY", ""};
-    const CliArgs  cli{};
+    const CliArgs cli{};
 
     const auto result = ConfigLoader::load(cli);
 
@@ -85,7 +88,7 @@ TEST(ConfigLoaderTest, MissingApiKeyReturnsMissingApiKeyError) {
 
 TEST(ConfigLoaderTest, DryRunBypassesApiKeyValidation) {
     const EnvGuard _key{"ANTHROPIC_API_KEY", ""};
-    const CliArgs  cli{.dry_run = true};
+    const CliArgs cli{.dry_run = true};
 
     const auto result = ConfigLoader::load(cli);
 
@@ -97,7 +100,7 @@ TEST(ConfigLoaderTest, DryRunBypassesApiKeyValidation) {
 
 TEST(ConfigLoaderTest, EnvVarApiKeyIsApplied) {
     const EnvGuard _key{"ANTHROPIC_API_KEY", "test-key-123"};
-    const CliArgs  cli{};
+    const CliArgs cli{};
 
     const auto result = ConfigLoader::load(cli);
 
@@ -108,7 +111,7 @@ TEST(ConfigLoaderTest, EnvVarApiKeyIsApplied) {
 TEST(ConfigLoaderTest, EnvVarModelIsApplied) {
     const EnvGuard _key{"ANTHROPIC_API_KEY", "test-key"};
     const EnvGuard _model{"CPP_REVIEW_MODEL", "claude-opus-4-0"};
-    const CliArgs  cli{};
+    const CliArgs cli{};
 
     const auto result = ConfigLoader::load(cli);
 
@@ -120,7 +123,7 @@ TEST(ConfigLoaderTest, EnvVarModelIsApplied) {
 
 TEST(ConfigLoaderTest, CliChecksOverrideDefault) {
     const EnvGuard _key{"ANTHROPIC_API_KEY", "test-key"};
-    const CliArgs  cli{.checks = {{CheckCategory::ub}}};
+    const CliArgs cli{.checks = {{CheckCategory::ub}}};
 
     const auto result = ConfigLoader::load(cli);
 
@@ -130,7 +133,7 @@ TEST(ConfigLoaderTest, CliChecksOverrideDefault) {
 
 TEST(ConfigLoaderTest, CliFailOnOverrideDefault) {
     const EnvGuard _key{"ANTHROPIC_API_KEY", "test-key"};
-    const CliArgs  cli{.fail_on = {{Severity::critical}}};
+    const CliArgs cli{.fail_on = {{Severity::critical}}};
 
     const auto result = ConfigLoader::load(cli);
 
@@ -140,7 +143,7 @@ TEST(ConfigLoaderTest, CliFailOnOverrideDefault) {
 
 TEST(ConfigLoaderTest, CliOutputFormatOverrideDefault) {
     const EnvGuard _key{"ANTHROPIC_API_KEY", "test-key"};
-    const CliArgs  cli{.output_format = OutputFormat::sarif};
+    const CliArgs cli{.output_format = OutputFormat::sarif};
 
     const auto result = ConfigLoader::load(cli);
 
@@ -150,18 +153,17 @@ TEST(ConfigLoaderTest, CliOutputFormatOverrideDefault) {
 
 TEST(ConfigLoaderTest, CliOutputFileIsSet) {
     const EnvGuard _key{"ANTHROPIC_API_KEY", "test-key"};
-    const CliArgs  cli{.output_file = "report.md"};
+    const CliArgs cli{.output_file = "report.md"};
 
     const auto result = ConfigLoader::load(cli);
 
     ASSERT_TRUE(result.has_value());
-    ASSERT_TRUE(result->output_file.has_value());
-    EXPECT_EQ(*result->output_file, "report.md");
+    EXPECT_EQ(result->output_file, std::make_optional<std::string>("report.md"));
 }
 
 TEST(ConfigLoaderTest, CliNoTelemetryWarningIsSet) {
     const EnvGuard _key{"ANTHROPIC_API_KEY", "test-key"};
-    const CliArgs  cli{.no_telemetry_warning = true};
+    const CliArgs cli{.no_telemetry_warning = true};
 
     const auto result = ConfigLoader::load(cli);
 
@@ -171,7 +173,7 @@ TEST(ConfigLoaderTest, CliNoTelemetryWarningIsSet) {
 
 TEST(ConfigLoaderTest, CliInputPathsPassedThrough) {
     const EnvGuard _key{"ANTHROPIC_API_KEY", "test-key"};
-    const CliArgs  cli{.input_paths = {"src/a.cpp", "src/b.cpp"}};
+    const CliArgs cli{.input_paths = {"src/a.cpp", "src/b.cpp"}};
 
     const auto result = ConfigLoader::load(cli);
 
@@ -183,8 +185,8 @@ TEST(ConfigLoaderTest, CliInputPathsPassedThrough) {
 
 TEST(ConfigLoaderTest, JsonConfigLoadsChecks) {
     const EnvGuard _key{"ANTHROPIC_API_KEY", "test-key"};
-    const auto     path = write_temp_json(R"({"checks": ["memory"]})");
-    const CliArgs  cli{};
+    const auto path = write_temp_json(R"({"checks": ["memory"]})");
+    const CliArgs cli{};
 
     const auto result = ConfigLoader::load(cli, path);
 
@@ -194,8 +196,8 @@ TEST(ConfigLoaderTest, JsonConfigLoadsChecks) {
 
 TEST(ConfigLoaderTest, JsonConfigLoadsFailOn) {
     const EnvGuard _key{"ANTHROPIC_API_KEY", "test-key"};
-    const auto     path = write_temp_json(R"({"fail_on": ["critical"]})");
-    const CliArgs  cli{};
+    const auto path = write_temp_json(R"({"fail_on": ["critical"]})");
+    const CliArgs cli{};
 
     const auto result = ConfigLoader::load(cli, path);
 
@@ -205,8 +207,8 @@ TEST(ConfigLoaderTest, JsonConfigLoadsFailOn) {
 
 TEST(ConfigLoaderTest, JsonConfigLoadsExcludedPaths) {
     const EnvGuard _key{"ANTHROPIC_API_KEY", "test-key"};
-    const auto     path = write_temp_json(R"({"exclude": ["build/", "third_party/"]})");
-    const CliArgs  cli{};
+    const auto path = write_temp_json(R"({"exclude": ["build/", "third_party/"]})");
+    const CliArgs cli{};
 
     const auto result = ConfigLoader::load(cli, path);
 
@@ -216,8 +218,8 @@ TEST(ConfigLoaderTest, JsonConfigLoadsExcludedPaths) {
 
 TEST(ConfigLoaderTest, CliChecksOverrideJsonConfig) {
     const EnvGuard _key{"ANTHROPIC_API_KEY", "test-key"};
-    const auto     path = write_temp_json(R"({"checks": ["memory"]})");
-    const CliArgs  cli{.checks = {{CheckCategory::ub}}};
+    const auto path = write_temp_json(R"({"checks": ["memory"]})");
+    const CliArgs cli{.checks = {{CheckCategory::ub}}};
 
     const auto result = ConfigLoader::load(cli, path);
 
@@ -228,7 +230,7 @@ TEST(ConfigLoaderTest, CliChecksOverrideJsonConfig) {
 // ─── JSON config file — error cases ──────────────────────────────────────────
 
 TEST(ConfigLoaderTest, InvalidJsonReturnsParseError) {
-    const auto    path = write_temp_json("not valid json {{{");
+    const auto path = write_temp_json("not valid json {{{");
     const CliArgs cli{.dry_run = true};
 
     const auto result = ConfigLoader::load(cli, path);
@@ -238,7 +240,7 @@ TEST(ConfigLoaderTest, InvalidJsonReturnsParseError) {
 }
 
 TEST(ConfigLoaderTest, InvalidCheckCategoryInJsonReturnsError) {
-    const auto    path = write_temp_json(R"({"checks": ["unknown_category"]})");
+    const auto path = write_temp_json(R"({"checks": ["unknown_category"]})");
     const CliArgs cli{.dry_run = true};
 
     const auto result = ConfigLoader::load(cli, path);
@@ -248,7 +250,7 @@ TEST(ConfigLoaderTest, InvalidCheckCategoryInJsonReturnsError) {
 }
 
 TEST(ConfigLoaderTest, InvalidSeverityInJsonReturnsError) {
-    const auto    path = write_temp_json(R"({"fail_on": ["ultra"]})");
+    const auto path = write_temp_json(R"({"fail_on": ["ultra"]})");
     const CliArgs cli{.dry_run = true};
 
     const auto result = ConfigLoader::load(cli, path);

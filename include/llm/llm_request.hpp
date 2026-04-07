@@ -8,9 +8,9 @@
 namespace llm {
 
 struct LlmRequest {
-    std::string                  system_prompt;
-    std::string                  user_content;
-    std::optional<std::string>   model;       // nullopt → CPP_REVIEW_MODEL env or default
+    std::string system_prompt;
+    std::string user_content;
+    std::optional<std::string> model;  // nullopt → CPP_REVIEW_MODEL env or default
     std::optional<std::uint32_t> max_tokens;  // nullopt → model default
 };
 

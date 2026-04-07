@@ -21,15 +21,14 @@ public:
     // config_file_path: when std::nullopt, searches for .cpp-review.json in the
     //   current working directory. A missing CWD config file is not an error.
     //   When an explicit path is provided, the file must exist.
-    [[nodiscard]] static std::expected<Config, ConfigError> load(
-        const CliArgs& cli, std::optional<std::filesystem::path> config_file_path = std::nullopt
-    );
+    [[nodiscard]] static std::expected<Config, ConfigError>
+    load(const CliArgs& cli, std::optional<std::filesystem::path> config_file_path = std::nullopt);
 
-    ConfigLoader()                               = delete;
-    ConfigLoader(const ConfigLoader&)            = delete;
-    ConfigLoader(ConfigLoader&&)                 = delete;
+    ConfigLoader() = delete;
+    ConfigLoader(const ConfigLoader&) = delete;
+    ConfigLoader(ConfigLoader&&) = delete;
     ConfigLoader& operator=(const ConfigLoader&) = delete;
-    ConfigLoader& operator=(ConfigLoader&&)      = delete;
+    ConfigLoader& operator=(ConfigLoader&&) = delete;
 };
 
 }  // namespace config
