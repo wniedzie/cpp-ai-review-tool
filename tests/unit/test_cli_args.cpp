@@ -81,12 +81,10 @@ TEST_F(CliArgsTest, ChecksUbMemory) {
 
     ASSERT_TRUE(result.has_value());
     ASSERT_TRUE(result->checks.has_value());
-    if (const auto& checks = result->checks; checks.has_value()) {
-        EXPECT_THAT(
-            checks.value(),
-            ::testing::UnorderedElementsAre(cli::CheckCategory::ub, cli::CheckCategory::memory)
-        );
-    }
+    EXPECT_THAT(
+        result->checks.value(),
+        ::testing::UnorderedElementsAre(cli::CheckCategory::ub, cli::CheckCategory::memory)
+    );
 }
 
 TEST_F(CliArgsTest, ChecksModernizationOnly) {
@@ -95,11 +93,9 @@ TEST_F(CliArgsTest, ChecksModernizationOnly) {
 
     ASSERT_TRUE(result.has_value());
     ASSERT_TRUE(result->checks.has_value());
-    if (const auto& checks = result->checks; checks.has_value()) {
-        EXPECT_THAT(
-            checks.value(), ::testing::UnorderedElementsAre(cli::CheckCategory::modernization)
-        );
-    }
+    EXPECT_THAT(
+        result->checks.value(), ::testing::UnorderedElementsAre(cli::CheckCategory::modernization)
+    );
 }
 
 TEST_F(CliArgsTest, ChecksUnknownValueReturnsError) {
@@ -118,9 +114,7 @@ TEST_F(CliArgsTest, FailOnCriticalOnly) {
 
     ASSERT_TRUE(result.has_value());
     ASSERT_TRUE(result->fail_on.has_value());
-    if (const auto& fail_on = result->fail_on; fail_on.has_value()) {
-        EXPECT_THAT(fail_on.value(), ::testing::UnorderedElementsAre(cli::Severity::critical));
-    }
+    EXPECT_THAT(result->fail_on.value(), ::testing::UnorderedElementsAre(cli::Severity::critical));
 }
 
 TEST_F(CliArgsTest, FailOnAllLevelsBelow) {
@@ -129,17 +123,12 @@ TEST_F(CliArgsTest, FailOnAllLevelsBelow) {
 
     ASSERT_TRUE(result.has_value());
     ASSERT_TRUE(result->fail_on.has_value());
-    if (const auto& fail_on = result->fail_on; fail_on.has_value()) {
-        EXPECT_THAT(
-            fail_on.value(),
-            ::testing::UnorderedElementsAre(
-                cli::Severity::low,
-                cli::Severity::medium,
-                cli::Severity::high,
-                cli::Severity::critical
-            )
-        );
-    }
+    EXPECT_THAT(
+        result->fail_on.value(),
+        ::testing::UnorderedElementsAre(
+            cli::Severity::low, cli::Severity::medium, cli::Severity::high, cli::Severity::critical
+        )
+    );
 }
 
 TEST_F(CliArgsTest, FailOnUnknownValueReturnsError) {

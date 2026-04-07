@@ -13,8 +13,8 @@
 namespace cli {
 
 using core::CheckCategory;
-using core::Severity;
 using core::OutputFormat;
+using core::Severity;
 using core::to_string;
 
 struct CliArgs {
