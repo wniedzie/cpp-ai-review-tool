@@ -171,11 +171,7 @@ TEST_F(CliArgsTest, OutputFileIsSet) {
     const auto result = cli::parse_args(argv.count(), argv.data());
 
     ASSERT_TRUE(result.has_value());
-    if (result->output_file) {
-        EXPECT_EQ(*result->output_file, std::filesystem::path{"out.md"});
-    } else {
-        FAIL() << "Expected output_file to be set";
-    }
+    EXPECT_EQ(*result->output_file, std::filesystem::path{"out.md"});  // NOLINT
 }
 
 // ── --dry-run ─────────────────────────────────────────────────────────────────
