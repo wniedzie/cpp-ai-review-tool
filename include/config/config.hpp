@@ -7,13 +7,14 @@
 #include <string_view>
 #include <vector>
 
+#include "core/types.hpp"
+
 namespace config {
 
-enum class CheckCategory : std::uint8_t { ub, memory, modernization };
-
-enum class Severity : std::uint8_t { info, low, medium, high, critical };
-
-enum class OutputFormat : std::uint8_t { markdown, json, sarif };
+using core::CheckCategory;
+using core::Severity;
+using core::OutputFormat;
+using core::to_string;
 
 enum class ConfigError : std::uint8_t {
     file_not_found,  // explicit config file path given but does not exist
@@ -23,35 +24,6 @@ enum class ConfigError : std::uint8_t {
     invalid_output_format,  // unknown --format value from CLI
     missing_api_key  // ANTHROPIC_API_KEY not set and dry_run is false
 };
-
-[[nodiscard]] constexpr std::string_view to_string(CheckCategory category) noexcept {
-    switch (category) {
-        case CheckCategory::ub: return "ub";
-        case CheckCategory::memory: return "memory";
-        case CheckCategory::modernization: return "modernization";
-    }
-    return "unknown";
-}
-
-[[nodiscard]] constexpr std::string_view to_string(Severity severity) noexcept {
-    switch (severity) {
-        case Severity::info: return "info";
-        case Severity::low: return "low";
-        case Severity::medium: return "medium";
-        case Severity::high: return "high";
-        case Severity::critical: return "critical";
-    }
-    return "unknown";
-}
-
-[[nodiscard]] constexpr std::string_view to_string(OutputFormat format) noexcept {
-    switch (format) {
-        case OutputFormat::markdown: return "markdown";
-        case OutputFormat::json: return "json";
-        case OutputFormat::sarif: return "sarif";
-    }
-    return "unknown";
-}
 
 [[nodiscard]] constexpr std::string_view to_string(ConfigError error) noexcept {
     switch (error) {

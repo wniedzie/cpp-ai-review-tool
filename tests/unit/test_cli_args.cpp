@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <unistd.h>
 
@@ -64,18 +65,12 @@ TEST_F(CliArgsTest, DefaultsAreApplied) {
 
     ASSERT_TRUE(result.has_value());
     EXPECT_EQ(result->input_path, temp_file_);
-    EXPECT_EQ(
-        result->checks,
-        (std::set<cli::CheckCategory>{
-            cli::CheckCategory::ub, cli::CheckCategory::memory, cli::CheckCategory::modernization})
-    );
-    EXPECT_EQ(
-        result->fail_on, (std::set<cli::Severity>{cli::Severity::high, cli::Severity::critical})
-    );
-    EXPECT_EQ(result->format, cli::OutputFormat::markdown);
+    EXPECT_FALSE(result->checks.has_value());
+    EXPECT_FALSE(result->fail_on.has_value());
+    EXPECT_FALSE(result->format.has_value());
     EXPECT_FALSE(result->output_file.has_value());
-    EXPECT_FALSE(result->dry_run);
-    EXPECT_FALSE(result->no_telemetry_warning);
+    EXPECT_FALSE(result->dry_run.has_value());
+    EXPECT_FALSE(result->no_telemetry_warning.has_value());
 }
 
 // ── --checks ──────────────────────────────────────────────────────────────────
@@ -85,10 +80,13 @@ TEST_F(CliArgsTest, ChecksUbMemory) {
     const auto result = cli::parse_args(argv.count(), argv.data());
 
     ASSERT_TRUE(result.has_value());
-    EXPECT_EQ(
-        result->checks,
-        (std::set<cli::CheckCategory>{cli::CheckCategory::ub, cli::CheckCategory::memory})
-    );
+    ASSERT_TRUE(result->checks.has_value());
+    if (const auto& checks = result->checks; checks.has_value()) {
+        EXPECT_THAT(
+            checks.value(),
+            ::testing::UnorderedElementsAre(cli::CheckCategory::ub, cli::CheckCategory::memory)
+        );
+    }
 }
 
 TEST_F(CliArgsTest, ChecksModernizationOnly) {
@@ -96,7 +94,12 @@ TEST_F(CliArgsTest, ChecksModernizationOnly) {
     const auto result = cli::parse_args(argv.count(), argv.data());
 
     ASSERT_TRUE(result.has_value());
-    EXPECT_EQ(result->checks, (std::set<cli::CheckCategory>{cli::CheckCategory::modernization}));
+    ASSERT_TRUE(result->checks.has_value());
+    if (const auto& checks = result->checks; checks.has_value()) {
+        EXPECT_THAT(
+            checks.value(), ::testing::UnorderedElementsAre(cli::CheckCategory::modernization)
+        );
+    }
 }
 
 TEST_F(CliArgsTest, ChecksUnknownValueReturnsError) {
@@ -114,7 +117,10 @@ TEST_F(CliArgsTest, FailOnCriticalOnly) {
     const auto result = cli::parse_args(argv.count(), argv.data());
 
     ASSERT_TRUE(result.has_value());
-    EXPECT_EQ(result->fail_on, (std::set<cli::Severity>{cli::Severity::critical}));
+    ASSERT_TRUE(result->fail_on.has_value());
+    if (const auto& fail_on = result->fail_on; fail_on.has_value()) {
+        EXPECT_THAT(fail_on.value(), ::testing::UnorderedElementsAre(cli::Severity::critical));
+    }
 }
 
 TEST_F(CliArgsTest, FailOnAllLevelsBelow) {
@@ -122,12 +128,18 @@ TEST_F(CliArgsTest, FailOnAllLevelsBelow) {
     const auto result = cli::parse_args(argv.count(), argv.data());
 
     ASSERT_TRUE(result.has_value());
-    EXPECT_EQ(
-        result->fail_on,
-        (std::set<cli::Severity>{
-            cli::Severity::low, cli::Severity::medium, cli::Severity::high, cli::Severity::critical}
-        )
-    );
+    ASSERT_TRUE(result->fail_on.has_value());
+    if (const auto& fail_on = result->fail_on; fail_on.has_value()) {
+        EXPECT_THAT(
+            fail_on.value(),
+            ::testing::UnorderedElementsAre(
+                cli::Severity::low,
+                cli::Severity::medium,
+                cli::Severity::high,
+                cli::Severity::critical
+            )
+        );
+    }
 }
 
 TEST_F(CliArgsTest, FailOnUnknownValueReturnsError) {
@@ -145,7 +157,8 @@ TEST_F(CliArgsTest, FormatJson) {
     const auto result = cli::parse_args(argv.count(), argv.data());
 
     ASSERT_TRUE(result.has_value());
-    EXPECT_EQ(result->format, cli::OutputFormat::json);
+    ASSERT_TRUE(result->format.has_value());
+    EXPECT_EQ(result->format, std::make_optional(cli::OutputFormat::json));
 }
 
 TEST_F(CliArgsTest, FormatSarif) {
@@ -153,7 +166,8 @@ TEST_F(CliArgsTest, FormatSarif) {
     const auto result = cli::parse_args(argv.count(), argv.data());
 
     ASSERT_TRUE(result.has_value());
-    EXPECT_EQ(result->format, cli::OutputFormat::sarif);
+    ASSERT_TRUE(result->format.has_value());
+    EXPECT_EQ(result->format, std::make_optional(cli::OutputFormat::sarif));
 }
 
 TEST_F(CliArgsTest, FormatUnknownReturnsError) {
@@ -171,7 +185,7 @@ TEST_F(CliArgsTest, OutputFileIsSet) {
     const auto result = cli::parse_args(argv.count(), argv.data());
 
     ASSERT_TRUE(result.has_value());
-    EXPECT_EQ(*result->output_file, std::filesystem::path{"out.md"});  // NOLINT
+    EXPECT_EQ(*result->output_file, std::string{"out.md"});  // NOLINT
 }
 
 // ── --dry-run ─────────────────────────────────────────────────────────────────
@@ -181,7 +195,8 @@ TEST_F(CliArgsTest, DryRunFlag) {
     const auto result = cli::parse_args(argv.count(), argv.data());
 
     ASSERT_TRUE(result.has_value());
-    EXPECT_TRUE(result->dry_run);
+    ASSERT_TRUE(result->dry_run.has_value());
+    EXPECT_EQ(result->dry_run, std::make_optional(true));
 }
 
 // ── --no-telemetry-warning ────────────────────────────────────────────────────
@@ -191,7 +206,8 @@ TEST_F(CliArgsTest, NoTelemetryWarningFlag) {
     const auto result = cli::parse_args(argv.count(), argv.data());
 
     ASSERT_TRUE(result.has_value());
-    EXPECT_TRUE(result->no_telemetry_warning);
+    ASSERT_TRUE(result->no_telemetry_warning.has_value());
+    EXPECT_EQ(result->no_telemetry_warning, std::make_optional(true));
 }
 
 // ── Missing / invalid path ────────────────────────────────────────────────────

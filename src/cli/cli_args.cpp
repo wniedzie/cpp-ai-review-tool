@@ -7,7 +7,6 @@
 #include <iterator>
 #include <optional>
 #include <ranges>
-#include <set>
 #include <string>
 #include <string_view>
 #include <system_error>
@@ -55,7 +54,7 @@ check_category_from_string(const std::string_view& category) noexcept {
     }
 }
 
-[[nodiscard]] std::expected<std::set<CheckCategory>, std::string>
+[[nodiscard]] std::expected<std::vector<CheckCategory>, std::string>
 parse_checks(const std::vector<std::string>& raw) {
     const auto cats = raw | std::views::transform(check_category_from_string);
 
@@ -66,15 +65,11 @@ parse_checks(const std::vector<std::string>& raw) {
         ));
     }
 
-    std::set<CheckCategory> result;
-    std::ranges::copy(
-        cats | std::views::transform([](const auto& opt) { return *opt; }),
-        std::inserter(result, result.end())
-    );
-    return result;
+    const auto deref = cats | std::views::transform([](const auto& opt) { return *opt; });
+    return std::vector<CheckCategory>(deref.begin(), deref.end());
 }
 
-[[nodiscard]] std::expected<std::set<Severity>, std::string>
+[[nodiscard]] std::expected<std::vector<Severity>, std::string>
 parse_fail_on(const std::vector<std::string>& raw) {
     const auto sevs = raw | std::views::transform(severity_from_string);
 
@@ -85,12 +80,8 @@ parse_fail_on(const std::vector<std::string>& raw) {
         ));
     }
 
-    std::set<Severity> result;
-    std::ranges::copy(
-        sevs | std::views::transform([](const auto& opt) { return *opt; }),
-        std::inserter(result, result.end())
-    );
-    return result;
+    const auto deref = sevs | std::views::transform([](const auto& opt) { return *opt; });
+    return std::vector<Severity>(deref.begin(), deref.end());
 }
 
 }  // namespace
@@ -105,19 +96,19 @@ std::expected<CliArgs, std::string> parse_args(int argc, const char* const* argv
     std::string input_path_str;
     app.add_option("path", input_path_str, "C++ source file or directory to review")->required();
 
-    std::vector<std::string> checks_raw{"ub", "memory", "modernization"};
+    std::vector<std::string> checks_raw;
     app.add_option(
            "--checks", checks_raw, "Comma-separated check categories: ub,memory,modernization"
     )
         ->delimiter(',');
 
-    std::vector<std::string> fail_on_raw{"high", "critical"};
+    std::vector<std::string> fail_on_raw;
     app.add_option(
            "--fail-on", fail_on_raw, "Severity levels that cause exit code 1 (comma-separated)"
     )
         ->delimiter(',');
 
-    std::string format_str{"markdown"};
+    std::string format_str;
     app.add_option("--format", format_str, "Output format: markdown, json, sarif");
 
     std::string output_file_str;
@@ -153,37 +144,55 @@ std::expected<CliArgs, std::string> parse_args(int argc, const char* const* argv
         return std::unexpected(std::format("path does not exist: '{}'", input_path_str));
     }
 
-    // Convert and validate --checks
-    const auto checks = parse_checks(checks_raw);
-    if (!checks) {
-        return std::unexpected(checks.error());
-    }
-
-    // Convert and validate --fail-on
-    const auto fail_on = parse_fail_on(fail_on_raw);
-    if (!fail_on) {
-        return std::unexpected(fail_on.error());
-    }
-
-    // Convert and validate --format
-    const auto format = output_format_from_string(format_str);
-    if (!format) {
-        return std::unexpected(std::format("unknown output format: '{}'", format_str));
-    }
-
+    // Convert and validate explicitly provided --checks
     CliArgs args;
     args.input_path = input_path;
-    args.checks = *checks;
-    args.fail_on = *fail_on;
-    args.format = *format;
-    args.dry_run = dry_run;
-    args.no_telemetry_warning = no_telemetry_warning;
 
-    if (!output_file_str.empty()) {
-        args.output_file = std::filesystem::path{output_file_str};
+    if (app.count("--checks") > 0) {
+        const auto checks = parse_checks(checks_raw);
+        if (!checks)
+            return std::unexpected(checks.error());
+        args.checks = *checks;
     }
 
+    // Convert and validate explicitly provided --fail-on
+    if (app.count("--fail-on") > 0) {
+        const auto fail_on = parse_fail_on(fail_on_raw);
+        if (!fail_on)
+            return std::unexpected(fail_on.error());
+        args.fail_on = *fail_on;
+    }
+
+    // Convert and validate explicitly provided --format
+    if (app.count("--format") > 0) {
+        const auto format = output_format_from_string(format_str);
+        if (!format)
+            return std::unexpected(std::format("unknown output format: '{}'", format_str));
+        args.format = format;
+    }
+
+    if (!output_file_str.empty())
+        args.output_file = output_file_str;
+
+    if (app.count("--dry-run") > 0)
+        args.dry_run = dry_run;
+
+    if (app.count("--no-telemetry-warning") > 0)
+        args.no_telemetry_warning = no_telemetry_warning;
+
     return args;
+}
+
+config::CliArgs to_config_args(const CliArgs& cli) {
+    return {
+        .checks = cli.checks,
+        .fail_on = cli.fail_on,
+        .output_format = cli.format,
+        .output_file = cli.output_file,
+        .dry_run = cli.dry_run,
+        .no_telemetry_warning = cli.no_telemetry_warning,
+        .input_paths = {cli.input_path.string()},
+    };
 }
 
 }  // namespace cli
