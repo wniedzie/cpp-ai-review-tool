@@ -171,11 +171,10 @@ TEST_F(CliArgsTest, OutputFileIsSet) {
     const auto result = cli::parse_args(argv.count(), argv.data());
 
     ASSERT_TRUE(result.has_value());
-    ASSERT_TRUE(result->output_file.has_value());
-    if (result) {
+    if (result->output_file) {
         EXPECT_EQ(*result->output_file, std::filesystem::path{"out.md"});
     } else {
-        FAIL() << "Expected parsing to succeed, but it failed with error: " << result.error();
+        FAIL() << "Expected output_file to be set";
     }
 }
 
