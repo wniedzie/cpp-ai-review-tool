@@ -116,8 +116,9 @@ TEST_F(CliArgsTest, FailOnCriticalOnly) {
     ASSERT_TRUE(result.has_value());
     ASSERT_TRUE(result->fail_on.has_value());
     EXPECT_THAT(
-        result->fail_on.value(), ::testing::UnorderedElementsAre(cli::Severity::critical)
-    );  // NOLINT(bugprone-unchecked-optional-access)
+        result->fail_on.value(),  // NOLINT(bugprone-unchecked-optional-access)
+        ::testing::UnorderedElementsAre(cli::Severity::critical)
+    );
 }
 
 TEST_F(CliArgsTest, FailOnAllLevelsBelow) {
