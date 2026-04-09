@@ -21,6 +21,13 @@ applyTo: "**/*.cpp,**/*.cxx,**/*.cc"
 - Use explicit types only when the deduced type is unclear, when a conversion is intended, or when a specific type is required for correctness.
 - Combine with `const`: prefer `const auto` as the default for local variables.
 
+## Almost Always Auto
+
+- Prefer `auto` for local variable declarations — let the compiler deduce the type.
+- Use `auto` for lambda parameters and return types when the type is obvious from context.
+- Use explicit types only when the deduced type is unclear, when a conversion is intended, or when a specific type is required for correctness.
+- Combine with `const`: prefer `const auto` as the default for local variables.
+
 ## Resource & Lifetime
 
 - Never use naked `new` / `delete`. Use smart pointers or RAII wrappers.
