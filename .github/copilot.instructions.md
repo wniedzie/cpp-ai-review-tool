@@ -39,6 +39,17 @@
 - Do not duplicate business rules — single source of truth for each piece of knowledge.
 - Use templates and concepts to generalize without code duplication.
 
+## Dependency Injection
+
+- **Constructor injection is the default.** Pass dependencies as constructor parameters — never create concrete collaborators internally (except in factory functions).
+- **Own via `std::unique_ptr<Interface>`.** Injected dependencies are moved into the owning class. Use `std::unique_ptr` for exclusive ownership of polymorphic collaborators.
+- **One production constructor, one testable constructor.** The production constructor may create defaults internally for convenience. Provide a second constructor (or make the default one accept an interface pointer) so tests can inject mocks/fakes without touching production wiring.
+- **Factory functions wire production graphs.** Free functions like `make_*()` read configuration, create concrete implementations, and return `std::unique_ptr<Interface>`. Keep factories in source files — never in headers.
+- **Concepts for compile-time DI.** When virtual dispatch is unnecessary, constrain templates with C++20 concepts (e.g., `LlmClientLike`) instead of abstract base classes. This enables zero-overhead injection and better compiler diagnostics.
+- **No IoC container.** The project is small enough for manual wiring. Do not introduce a DI framework.
+- **Decorator pattern for cross-cutting concerns.** Wrap an interface implementation with another implementation of the same interface (e.g., `RateLimitedLlmClient` wrapping `LlmClient`). Chain decorators via constructor injection.
+- **Every boundary gets an interface.** External systems (HTTP, LLM API, file system, config loading) must be accessed through an abstract base class or concept so they can be mocked in tests.
+
 ## Design Patterns
 
 Apply design patterns where they solve a real problem. Prefer modern C++ idioms:
@@ -79,6 +90,13 @@ Apply design patterns where they solve a real problem. Prefer modern C++ idioms:
 - Use **C++20 concepts** to constrain templates — do not use `std::enable_if` or SFINAE.
 - Define meaningful, semantic concepts (e.g., `Number`, `Serializable`) over bare syntactic constraints.
 - Prefer `constexpr` computations over template metaprogramming for value-level computation.
+
+## Almost Always Auto
+
+- Prefer `auto` for local variable declarations — let the compiler deduce the type.
+- Use `auto` for lambda parameters and return types when the type is obvious from context.
+- Use explicit types only when the deduced type is unclear, when a conversion is intended, or when a specific type is required for correctness.
+- Combine with `const`: prefer `const auto` as the default for local variables.
 
 ## Const Correctness & Immutability
 

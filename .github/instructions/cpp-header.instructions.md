@@ -24,6 +24,12 @@ applyTo: "**/*.hpp,**/*.h,**/*.hxx"
 - Define semantic concepts (e.g., `Serializable`, `Drawable`) not just syntactic checks.
 - Mark functions `constexpr` when they can be evaluated at compile time.
 
+## Almost Always Auto
+
+- Prefer `auto` for variable declarations — let the compiler deduce the type.
+- Use explicit types only when the deduced type is unclear, when a conversion is intended, or when a specific type is required for correctness.
+- Combine with `const`: prefer `const auto` as the default.
+
 ## Const Correctness
 
 - Mark member functions `const` when they do not modify observable state.

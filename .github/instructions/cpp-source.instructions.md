@@ -2,6 +2,7 @@
 description: "Use when writing or modifying C++ source files (.cpp, .cxx, .cc). Covers implementation patterns, functional style, views usage, and RAII."
 applyTo: "**/*.cpp,**/*.cxx,**/*.cc"
 ---
+
 # C++ Source File Guidelines
 
 ## Implementation Style
@@ -11,6 +12,13 @@ applyTo: "**/*.cpp,**/*.cxx,**/*.cc"
 - Use `std::expected<T, E>` for functions that can fail; chain with `.and_then()` / `.transform()`.
 - Use lambdas for local behavior; prefer generic lambdas (`auto` params) when the body is generic.
 - Use `constexpr` / `consteval` on any function that can be evaluated at compile time.
+
+## Almost Always Auto
+
+- Prefer `auto` for local variable declarations — let the compiler deduce the type.
+- Use `auto` for lambda parameters and return types when the type is obvious from context.
+- Use explicit types only when the deduced type is unclear, when a conversion is intended, or when a specific type is required for correctness.
+- Combine with `const`: prefer `const auto` as the default for local variables.
 
 ## Resource & Lifetime
 
