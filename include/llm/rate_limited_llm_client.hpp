@@ -22,11 +22,11 @@ public:
     [[nodiscard]] std::expected<LlmResponse, LlmError> complete(const LlmRequest& request) override;
 
 private:
-    std::unique_ptr<LlmClient> m_inner;
-    TokenBucketConfig m_config;
-    mutable std::mutex m_mutex;
-    double m_available_tokens;
-    std::chrono::steady_clock::time_point m_last_refill;
+    std::unique_ptr<LlmClient> inner_;
+    TokenBucketConfig config_;
+    mutable std::mutex mutex_;
+    double available_tokens_;
+    std::chrono::steady_clock::time_point last_refill_;
 };
 
 }  // namespace llm

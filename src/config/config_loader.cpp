@@ -13,7 +13,7 @@
 
 namespace config {
 
-namespace {
+namespace detail {
 using namespace core;
 
 // ─── JSON file reading ────────────────────────────────────────────────────────
@@ -103,7 +103,7 @@ apply_json_config(Config& cfg, const nlohmann::json& json) {
     return {};
 }
 
-}  // namespace
+}  // namespace detail
 
 // ─── ConfigLoader::load ───────────────────────────────────────────────────────
 
@@ -123,11 +123,11 @@ ConfigLoader::load(const CliArgs& cli, std::optional<std::filesystem::path> conf
         .excluded_paths = {}};
 
     // 2. Config file (.cpp-review.json)
-    auto json_result = read_json_file(config_file_path);
+    auto json_result = detail::read_json_file(config_file_path);
     if (!json_result)
         return std::unexpected(json_result.error());
     if (auto& json_opt = *json_result; json_opt) {
-        auto apply_result = apply_json_config(cfg, *json_opt);
+        auto apply_result = detail::apply_json_config(cfg, *json_opt);
         if (!apply_result)
             return std::unexpected(apply_result.error());
     }

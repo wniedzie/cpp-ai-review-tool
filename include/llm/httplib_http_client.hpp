@@ -24,9 +24,9 @@ public:
     ) override;
 
 private:
-    std::string m_host;
-    int m_port;
-    std::chrono::seconds m_timeout;
+    std::string host_;
+    int port_;
+    std::chrono::seconds timeout_;
 };
 
 }  // namespace llm

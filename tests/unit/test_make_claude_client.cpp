@@ -9,7 +9,7 @@ namespace llm::test {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-namespace {
+namespace helpers {
 
 void set_env(const char* name, const char* value) {
     ::setenv(name, value, /*overwrite=*/1);
@@ -19,13 +19,13 @@ void unset_env(const char* name) {
     ::unsetenv(name);
 }
 
-}  // namespace
+}  // namespace helpers
 
 // ─── make_claude_client() ────────────────────────────────────────────────────
 
 TEST(MakeClaudeClientTest, ReturnAuthFailureWhenApiKeyMissing) {
-    unset_env("ANTHROPIC_API_KEY");
-    unset_env("CPP_REVIEW_MODEL");
+    helpers::unset_env("ANTHROPIC_API_KEY");
+    helpers::unset_env("CPP_REVIEW_MODEL");
 
     const auto result = make_claude_client();
 
@@ -34,8 +34,8 @@ TEST(MakeClaudeClientTest, ReturnAuthFailureWhenApiKeyMissing) {
 }
 
 TEST(MakeClaudeClientTest, ReturnAuthFailureWhenApiKeyEmpty) {
-    set_env("ANTHROPIC_API_KEY", "");
-    unset_env("CPP_REVIEW_MODEL");
+    helpers::set_env("ANTHROPIC_API_KEY", "");
+    helpers::unset_env("CPP_REVIEW_MODEL");
 
     const auto result = make_claude_client();
 
@@ -44,8 +44,8 @@ TEST(MakeClaudeClientTest, ReturnAuthFailureWhenApiKeyEmpty) {
 }
 
 TEST(MakeClaudeClientTest, ReturnAuthFailureWhenApiKeyHasSpace) {
-    set_env("ANTHROPIC_API_KEY", "sk- key");
-    unset_env("CPP_REVIEW_MODEL");
+    helpers::set_env("ANTHROPIC_API_KEY", "sk- key");
+    helpers::unset_env("CPP_REVIEW_MODEL");
 
     const auto result = make_claude_client();
 
@@ -54,8 +54,8 @@ TEST(MakeClaudeClientTest, ReturnAuthFailureWhenApiKeyHasSpace) {
 }
 
 TEST(MakeClaudeClientTest, ReturnAuthFailureWhenApiKeyHasCRLF) {
-    set_env("ANTHROPIC_API_KEY", "sk\r\nX-Evil-Header: injected");
-    unset_env("CPP_REVIEW_MODEL");
+    helpers::set_env("ANTHROPIC_API_KEY", "sk\r\nX-Evil-Header: injected");
+    helpers::unset_env("CPP_REVIEW_MODEL");
 
     const auto result = make_claude_client();
 
@@ -64,8 +64,8 @@ TEST(MakeClaudeClientTest, ReturnAuthFailureWhenApiKeyHasCRLF) {
 }
 
 TEST(MakeClaudeClientTest, ReturnAuthFailureWhenApiKeyHasAtSign) {
-    set_env("ANTHROPIC_API_KEY", "user@host");
-    unset_env("CPP_REVIEW_MODEL");
+    helpers::set_env("ANTHROPIC_API_KEY", "user@host");
+    helpers::unset_env("CPP_REVIEW_MODEL");
 
     const auto result = make_claude_client();
 
@@ -74,8 +74,8 @@ TEST(MakeClaudeClientTest, ReturnAuthFailureWhenApiKeyHasAtSign) {
 }
 
 TEST(MakeClaudeClientTest, ReturnClientForMinimalAlphanumericKey) {
-    set_env("ANTHROPIC_API_KEY", "abc123");
-    unset_env("CPP_REVIEW_MODEL");
+    helpers::set_env("ANTHROPIC_API_KEY", "abc123");
+    helpers::unset_env("CPP_REVIEW_MODEL");
 
     const auto result = make_claude_client();
 
@@ -83,8 +83,8 @@ TEST(MakeClaudeClientTest, ReturnClientForMinimalAlphanumericKey) {
 }
 
 TEST(MakeClaudeClientTest, ReturnClientForRealWorldKeyFormat) {
-    set_env("ANTHROPIC_API_KEY", "sk-ant-api03_abc123-xyz");
-    unset_env("CPP_REVIEW_MODEL");
+    helpers::set_env("ANTHROPIC_API_KEY", "sk-ant-api03_abc123-xyz");
+    helpers::unset_env("CPP_REVIEW_MODEL");
 
     const auto result = make_claude_client();
 
@@ -92,8 +92,8 @@ TEST(MakeClaudeClientTest, ReturnClientForRealWorldKeyFormat) {
 }
 
 TEST(MakeClaudeClientTest, ReturnClientWhenCppReviewModelEmpty) {
-    set_env("ANTHROPIC_API_KEY", "abc123");
-    set_env("CPP_REVIEW_MODEL", "");
+    helpers::set_env("ANTHROPIC_API_KEY", "abc123");
+    helpers::set_env("CPP_REVIEW_MODEL", "");
 
     const auto result = make_claude_client();
 
@@ -101,8 +101,8 @@ TEST(MakeClaudeClientTest, ReturnClientWhenCppReviewModelEmpty) {
 }
 
 TEST(MakeClaudeClientTest, ReturnClientWhenCppReviewModelSet) {
-    set_env("ANTHROPIC_API_KEY", "abc123");
-    set_env("CPP_REVIEW_MODEL", "claude-opus-4");
+    helpers::set_env("ANTHROPIC_API_KEY", "abc123");
+    helpers::set_env("CPP_REVIEW_MODEL", "claude-opus-4");
 
     const auto result = make_claude_client();
 

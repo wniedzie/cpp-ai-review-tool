@@ -3,6 +3,7 @@ add_executable(unit_tests
     unit/test_make_claude_client.cpp
     unit/test_claude_llm_client.cpp
     unit/test_cli_args.cpp
+    unit/test_review_engine.cpp
 )
 target_link_libraries(unit_tests PRIVATE
     cpp_review_lib

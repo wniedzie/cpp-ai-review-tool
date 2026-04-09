@@ -17,7 +17,7 @@
 
 namespace llm {
 
-namespace {
+namespace detail {
 
 constexpr std::string_view api_host = "api.anthropic.com";
 constexpr std::string_view api_path = "/v1/messages";
@@ -102,26 +102,26 @@ send_request(IHttpClient& http_client, const std::string& body, const std::strin
     return parse_response_body(result->body);
 }
 
-}  // anonymous namespace
+}  // namespace detail
 
 // ─── ClaudeLlmClient ─────────────────────────────────────────────────────────
 
 ClaudeLlmClient::ClaudeLlmClient(std::string api_key, std::string model)
-    : m_api_key{std::move(api_key)}
-    , m_model{std::move(model)}
-    , m_http_client{std::make_unique<HttplibSslClient>(api_host, 443, request_timeout)} {}
+    : api_key_{std::move(api_key)}
+    , model_{std::move(model)}
+    , http_client_{std::make_unique<HttplibSslClient>(detail::api_host, 443, detail::request_timeout)} {}
 
 ClaudeLlmClient::ClaudeLlmClient(
     std::string api_key, std::string model, std::unique_ptr<IHttpClient> http_client
 )
-    : m_api_key{std::move(api_key)}
-    , m_model{std::move(model)}
-    , m_http_client{std::move(http_client)} {}
+    : api_key_{std::move(api_key)}
+    , model_{std::move(model)}
+    , http_client_{std::move(http_client)} {}
 
 std::expected<LlmResponse, LlmError> ClaudeLlmClient::complete(const LlmRequest& request) {
-    const std::string& effective_model = request.model.has_value() ? *request.model : m_model;
-    const auto body = build_request_body(request, effective_model);
-    return send_request(*m_http_client, body, m_api_key);
+    const std::string& effective_model = request.model.has_value() ? *request.model : model_;
+    const auto body = detail::build_request_body(request, effective_model);
+    return detail::send_request(*http_client_, body, api_key_);
 }
 
 // ─── Factory ─────────────────────────────────────────────────────────────────
@@ -134,14 +134,14 @@ std::expected<ClaudeLlmClient, LlmError> make_claude_client() {
         return std::unexpected{LlmError::AuthFailure};
     }
 
-    if (!is_valid_api_key(api_key_env)) {
+    if (!detail::is_valid_api_key(api_key_env)) {
         return std::unexpected{LlmError::AuthFailure};
     }
 
     const auto* const model_env = std::getenv("CPP_REVIEW_MODEL");
     auto model = (model_env != nullptr && !std::string_view{model_env}.empty())
                      ? std::string{model_env}
-                     : std::string{default_model};
+                     : std::string{detail::default_model};
 
     return ClaudeLlmClient{std::string{api_key_env}, std::move(model)};
 }
