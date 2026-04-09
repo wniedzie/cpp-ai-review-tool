@@ -125,6 +125,10 @@ The tool resolves configuration by merging four sources in descending priority:
 │   ├── config/
 │   │   ├── config.hpp          # Config types: CliArgs, Config, enums, ConfigError
 │   │   └── config_loader.hpp   # ConfigLoader — merges CLI, env, file, defaults
+│   ├── engine/
+│   │   ├── review_engine.hpp       # ReviewEngine — orchestrates LLM-based code analysis
+│   │   ├── review_result.hpp       # ReviewResult data structure
+│   │   └── system_prompt.hpp       # Configurable system prompts for the LLM
 │   └── llm/
 │       ├── llm_client.hpp          # Abstract LLM client interface
 │       ├── llm_request.hpp
@@ -140,6 +144,8 @@ The tool resolves configuration by merging four sources in descending priority:
 │   │   └── cli_args.cpp            # CLI11-based argument parsing
 │   ├── config/
 │   │   └── config_loader.cpp
+│   ├── engine/
+│   │   └── review_engine.cpp
 │   └── llm/
 │       ├── claude_llm_client.cpp
 │       ├── httplib_http_client.cpp
@@ -149,7 +155,8 @@ The tool resolves configuration by merging four sources in descending priority:
     │   ├── test_cli_args.cpp
     │   ├── test_claude_llm_client.cpp
     │   ├── test_config_loader.cpp
-    │   └── test_make_claude_client.cpp
+    │   ├── test_make_claude_client.cpp
+    │   └── test_review_engine.cpp
     └── integration/
         └── test_claude_llm_client_integration.cpp
 ```
