@@ -39,6 +39,17 @@
 - Do not duplicate business rules — single source of truth for each piece of knowledge.
 - Use templates and concepts to generalize without code duplication.
 
+## Dependency Injection
+
+- **Constructor injection is the default.** Pass dependencies as constructor parameters — never create concrete collaborators internally (except in factory functions).
+- **Own via `std::unique_ptr<Interface>`.** Injected dependencies are moved into the owning class. Use `std::unique_ptr` for exclusive ownership of polymorphic collaborators.
+- **One production constructor, one testable constructor.** The production constructor may create defaults internally for convenience. Provide a second constructor (or make the default one accept an interface pointer) so tests can inject mocks/fakes without touching production wiring.
+- **Factory functions wire production graphs.** Free functions like `make_*()` read configuration, create concrete implementations, and return `std::unique_ptr<Interface>`. Keep factories in source files — never in headers.
+- **Concepts for compile-time DI.** When virtual dispatch is unnecessary, constrain templates with C++20 concepts (e.g., `LlmClientLike`) instead of abstract base classes. This enables zero-overhead injection and better compiler diagnostics.
+- **No IoC container.** The project is small enough for manual wiring. Do not introduce a DI framework.
+- **Decorator pattern for cross-cutting concerns.** Wrap an interface implementation with another implementation of the same interface (e.g., `RateLimitedLlmClient` wrapping `LlmClient`). Chain decorators via constructor injection.
+- **Every boundary gets an interface.** External systems (HTTP, LLM API, file system, config loading) must be accessed through an abstract base class or concept so they can be mocked in tests.
+
 ## Design Patterns
 
 Apply design patterns where they solve a real problem. Prefer modern C++ idioms:
@@ -80,6 +91,13 @@ Apply design patterns where they solve a real problem. Prefer modern C++ idioms:
 - Define meaningful, semantic concepts (e.g., `Number`, `Serializable`) over bare syntactic constraints.
 - Prefer `constexpr` computations over template metaprogramming for value-level computation.
 
+## Almost Always Auto
+
+- Prefer `auto` for local variable declarations — let the compiler deduce the type.
+- Use `auto` for lambda parameters and return types when the type is obvious from context.
+- Use explicit types only when the deduced type is unclear, when a conversion is intended, or when a specific type is required for correctness.
+- Combine with `const`: prefer `const auto` as the default for local variables.
+
 ## Const Correctness & Immutability
 
 - Default to `const` — every variable, parameter, and member function that can be `const` should be.
@@ -87,11 +105,17 @@ Apply design patterns where they solve a real problem. Prefer modern C++ idioms:
 - Mark member functions `const` when they do not modify observable state.
 - Prefer value semantics and pass-by-const-reference over mutable shared state.
 
+## Control Flow
+
+- **Prefer guard clauses** over nested `if` blocks. Return (or throw/break) early to handle preconditions and error cases at the top of a function, keeping the happy path unindented.
+- Avoid deeply nested conditionals — flatten with early returns instead.
+
 ## Naming Conventions
 
 - **Types** (classes, structs, concepts, enums, aliases): `PascalCase`
 - **Functions, methods, variables, parameters**: `snake_case`
-- **Constants, enum values**: `snake_case` (descriptive name, no prefix) or `UPPER_SNAKE_CASE`
+- **Constants, enum values**: `snake_case` — no `k` prefix, no `UPPER_SNAKE_CASE`. Example: `constexpr double tokens_per_second = 0.5;`
+- **Private member variables**: `snake_case` with a trailing `_` suffix — no `m_` or other prefix. Example: `double rate_;`
 - **Template parameters**: `PascalCase` (e.g., `typename Value`, `typename Predicate`)
 - **Namespaces**: `lower_snake_case`
 - **File names**: `snake_case.hpp`, `snake_case.cpp`
@@ -102,3 +126,4 @@ Apply design patterns where they solve a real problem. Prefer modern C++ idioms:
 - Use traditional `#ifndef` / `#define` / `#endif` include guards (not `#pragma once`) and follow the single, non-reserved include-guard naming convention defined in `.github/instructions/cpp-header.instructions.md`.
 - Prefer forward declarations to reduce header coupling.
 - Group includes: standard library → third-party → project headers, separated by blank lines.
+- **No anonymous namespaces.** Every namespace must have a name. Use `detail` for implementation internals, `helpers` for test or utility helpers, or another descriptive name. This keeps translation units navigable and avoids hidden-linkage surprises.
