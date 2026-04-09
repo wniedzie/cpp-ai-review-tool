@@ -105,11 +105,17 @@ Apply design patterns where they solve a real problem. Prefer modern C++ idioms:
 - Mark member functions `const` when they do not modify observable state.
 - Prefer value semantics and pass-by-const-reference over mutable shared state.
 
+## Control Flow
+
+- **Prefer guard clauses** over nested `if` blocks. Return (or throw/break) early to handle preconditions and error cases at the top of a function, keeping the happy path unindented.
+- Avoid deeply nested conditionals — flatten with early returns instead.
+
 ## Naming Conventions
 
 - **Types** (classes, structs, concepts, enums, aliases): `PascalCase`
 - **Functions, methods, variables, parameters**: `snake_case`
-- **Constants, enum values**: `snake_case` (descriptive name, no prefix) or `UPPER_SNAKE_CASE`
+- **Constants, enum values**: `snake_case` — no `k` prefix, no `UPPER_SNAKE_CASE`. Example: `constexpr double tokens_per_second = 0.5;`
+- **Private member variables**: `snake_case` with a trailing `_` suffix — no `m_` or other prefix. Example: `double rate_;`
 - **Template parameters**: `PascalCase` (e.g., `typename Value`, `typename Predicate`)
 - **Namespaces**: `lower_snake_case`
 - **File names**: `snake_case.hpp`, `snake_case.cpp`
@@ -120,3 +126,4 @@ Apply design patterns where they solve a real problem. Prefer modern C++ idioms:
 - Use traditional `#ifndef` / `#define` / `#endif` include guards (not `#pragma once`) and follow the single, non-reserved include-guard naming convention defined in `.github/instructions/cpp-header.instructions.md`.
 - Prefer forward declarations to reduce header coupling.
 - Group includes: standard library → third-party → project headers, separated by blank lines.
+- **No anonymous namespaces.** Every namespace must have a name. Use `detail` for implementation internals, `helpers` for test or utility helpers, or another descriptive name. This keeps translation units navigable and avoids hidden-linkage surprises.
