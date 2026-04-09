@@ -23,9 +23,9 @@ public:
     [[nodiscard]] std::expected<LlmResponse, LlmError> complete(const LlmRequest& request) override;
 
 private:
-    std::string m_api_key;
-    std::string m_model;
-    std::unique_ptr<IHttpClient> m_http_client{nullptr};
+    std::string api_key_;
+    std::string model_;
+    std::unique_ptr<IHttpClient> http_client_{nullptr};
 };
 
 // Factory — reads ANTHROPIC_API_KEY and CPP_REVIEW_MODEL environment variables.

@@ -16,21 +16,21 @@
 
 namespace llm::test {
 
-namespace {
+namespace helpers {
 
 bool api_key_available() {
     const auto* const key = std::getenv("ANTHROPIC_API_KEY");
     return key != nullptr && !std::string_view{key}.empty();
 }
 
-}  // namespace
+}  // namespace helpers
 
 // ─── Fixture ──────────────────────────────────────────────────────────────────
 
 class ClaudeLlmClientIntegrationTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        if (!api_key_available()) {
+        if (!helpers::api_key_available()) {
             GTEST_SKIP() << "ANTHROPIC_API_KEY not set — skipping integration test";
         }
     }

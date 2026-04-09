@@ -36,7 +36,7 @@ public:
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-namespace {
+namespace helpers {
 
 // Minimal well-formed Anthropic API response body.
 std::string make_success_body(
@@ -52,7 +52,7 @@ std::string make_success_body(
         .dump();
 }
 
-}  // namespace
+}  // namespace helpers
 
 // ─── Fixture: ClaudeLlmClientTest ─────────────────────────────────────────────
 // TEST_F is used for tests that share the same fixture structure but are
@@ -81,7 +81,7 @@ protected:
 TEST_F(ClaudeLlmClientTest, SuccessfulResponseParsed) {
     EXPECT_CALL(*mock_, post(_, _, _, _))
         .WillOnce(Return(HttpResponse{
-            .status = 200, .body = make_success_body("Answer", "end_turn", 8, 3)}));
+            .status = 200, .body = helpers::make_success_body("Answer", "end_turn", 8, 3)}));
 
     const auto result = client_->complete(minimal_request());
 
@@ -102,7 +102,7 @@ TEST_F(ClaudeLlmClientTest, SystemPromptIncludedInBody) {
                       const std::string& body,
                       std::string_view) {
             captured_body = body;
-            return HttpResponse{.status = 200, .body = make_success_body()};
+            return HttpResponse{.status = 200, .body = helpers::make_success_body()};
         });
 
     LlmRequest request = minimal_request();
@@ -122,7 +122,7 @@ TEST_F(ClaudeLlmClientTest, EmptySystemPromptOmittedFromBody) {
                       const std::string& body,
                       std::string_view) {
             captured_body = body;
-            return HttpResponse{.status = 200, .body = make_success_body()};
+            return HttpResponse{.status = 200, .body = helpers::make_success_body()};
         });
 
     std::ignore = client_->complete(minimal_request());
@@ -139,7 +139,7 @@ TEST_F(ClaudeLlmClientTest, RequestModelOverridesClientModel) {
                       const std::string& body,
                       std::string_view) {
             captured_body = body;
-            return HttpResponse{.status = 200, .body = make_success_body()};
+            return HttpResponse{.status = 200, .body = helpers::make_success_body()};
         });
 
     LlmRequest request = minimal_request();
@@ -163,7 +163,7 @@ TEST_F(ClaudeLlmClientTest, ClientModelUsedWhenRequestModelAbsent) {
                       const std::string& body,
                       std::string_view) {
             captured_body = body;
-            return HttpResponse{.status = 200, .body = make_success_body()};
+            return HttpResponse{.status = 200, .body = helpers::make_success_body()};
         });
 
     LlmRequest request = minimal_request();
@@ -182,7 +182,7 @@ TEST_F(ClaudeLlmClientTest, MaxTokensDefaultedTo4096) {
                       const std::string& body,
                       std::string_view) {
             captured_body = body;
-            return HttpResponse{.status = 200, .body = make_success_body()};
+            return HttpResponse{.status = 200, .body = helpers::make_success_body()};
         });
 
     // request.max_tokens is nullopt
@@ -200,7 +200,7 @@ TEST_F(ClaudeLlmClientTest, MaxTokensCustomValue) {
                       const std::string& body,
                       std::string_view) {
             captured_body = body;
-            return HttpResponse{.status = 200, .body = make_success_body()};
+            return HttpResponse{.status = 200, .body = helpers::make_success_body()};
         });
 
     LlmRequest request = minimal_request();
@@ -226,7 +226,7 @@ TEST_F(ClaudeLlmClientTest, ApiKeyPassedInHeader) {
                       const std::string&,
                       std::string_view) {
             captured_headers = headers;
-            return HttpResponse{.status = 200, .body = make_success_body()};
+            return HttpResponse{.status = 200, .body = helpers::make_success_body()};
         });
 
     std::ignore = client->complete(minimal_request());
@@ -246,7 +246,7 @@ TEST_F(ClaudeLlmClientTest, AnthropicVersionHeaderPresent) {
                       const std::string&,
                       std::string_view) {
             captured_headers = headers;
-            return HttpResponse{.status = 200, .body = make_success_body()};
+            return HttpResponse{.status = 200, .body = helpers::make_success_body()};
         });
 
     std::ignore = client_->complete(minimal_request());
@@ -266,7 +266,7 @@ TEST_F(ClaudeLlmClientTest, ContentTypeHeaderIsApplicationJson) {
                       const std::string&,
                       std::string_view ctype) {
             captured_ct = ctype;
-            return HttpResponse{.status = 200, .body = make_success_body()};
+            return HttpResponse{.status = 200, .body = helpers::make_success_body()};
         });
 
     std::ignore = client_->complete(minimal_request());

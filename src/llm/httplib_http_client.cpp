@@ -11,9 +11,9 @@ namespace llm {
 HttplibSslClient::HttplibSslClient(
     std::string_view host, const int port, const std::chrono::seconds timeout
 )
-    : m_host{host}
-    , m_port{port}
-    , m_timeout{timeout} {}
+    : host_{host}
+    , port_{port}
+    , timeout_{timeout} {}
 
 std::optional<HttpResponse> HttplibSslClient::post(
     const std::string_view path,
@@ -22,9 +22,9 @@ std::optional<HttpResponse> HttplibSslClient::post(
     const std::string_view content_type
 ) {
 
-    httplib::SSLClient client{m_host, m_port};
-    client.set_read_timeout(m_timeout);
-    client.set_connection_timeout(m_timeout);
+    httplib::SSLClient client{host_, port_};
+    client.set_read_timeout(timeout_);
+    client.set_connection_timeout(timeout_);
     client.enable_server_certificate_verification(true);
 
     httplib::Headers httplib_headers;

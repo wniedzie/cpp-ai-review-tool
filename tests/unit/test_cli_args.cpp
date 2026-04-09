@@ -9,7 +9,7 @@
 
 #include "cli/cli_args.hpp"
 
-namespace {
+namespace helpers {
 
 // Owns string data and exposes a stable const char* const* pointer array.
 // argv[0] is always "cpp-review". Strings are fully built before ptrs are taken
@@ -220,4 +220,4 @@ TEST_F(CliArgsTest, NonExistentPathReturnsError) {
     EXPECT_NE(result.error().find("does not exist"), std::string::npos);
 }
 
-}  // namespace
+}  // namespace helpers
