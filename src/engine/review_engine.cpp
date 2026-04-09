@@ -41,7 +41,7 @@ constexpr std::size_t chars_per_token = 4;
     );
 }
 
-}  // namespace
+}  // namespace detail
 
 ReviewEngine::ReviewEngine(std::unique_ptr<llm::LlmClient> client, config::Config config)
     : client_{std::move(client)}
@@ -49,10 +49,12 @@ ReviewEngine::ReviewEngine(std::unique_ptr<llm::LlmClient> client, config::Confi
 
 std::expected<ReviewResult, llm::LlmError> ReviewEngine::run(const std::string_view source_code) {
     const auto checks_str = detail::format_checks(config_.checks);
-    const auto system_prompt = std::vformat(system_prompt_template, std::make_format_args(checks_str));
+    const auto system_prompt =
+        std::vformat(system_prompt_template, std::make_format_args(checks_str));
 
     if (config_.dry_run) {
-        const auto estimated_input = static_cast<std::uint32_t>(source_code.size() / detail::chars_per_token);
+        const auto estimated_input =
+            static_cast<std::uint32_t>(source_code.size() / detail::chars_per_token);
         return ReviewResult{.content = {}, .input_tokens = estimated_input, .output_tokens = 0};
     }
 
@@ -75,7 +77,8 @@ std::expected<ReviewEngine, llm::LlmError> make_review_engine(const config::Conf
     auto client = std::make_unique<llm::RateLimitedLlmClient>(
         std::move(inner),
         llm::TokenBucketConfig{
-            .tokens_per_second = detail::tokens_per_second, .burst_capacity = detail::burst_capacity}
+            .tokens_per_second = detail::tokens_per_second,
+            .burst_capacity = detail::burst_capacity}
     );
     return ReviewEngine{std::move(client), config};
 }

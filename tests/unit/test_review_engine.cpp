@@ -36,10 +36,8 @@ public:
 namespace helpers {
 
 config::Config make_config(
-    std::vector<core::CheckCategory> checks = {
-        core::CheckCategory::ub,
-        core::CheckCategory::memory,
-        core::CheckCategory::modernization},
+    std::vector<core::CheckCategory> checks =
+        {core::CheckCategory::ub, core::CheckCategory::memory, core::CheckCategory::modernization},
     const bool dry_run = false
 ) {
     return config::Config{
@@ -81,7 +79,9 @@ TEST(ReviewEngineTest, RunPassesSourceCodeAsUserContent) {
     auto mock = std::make_unique<MockLlmClient>();
     constexpr std::string_view source = "void foo() {}";
 
-    EXPECT_CALL(*mock, complete(::testing::Field(&llm::LlmRequest::user_content, std::string{source})))
+    EXPECT_CALL(
+        *mock, complete(::testing::Field(&llm::LlmRequest::user_content, std::string{source}))
+    )
         .WillOnce(Return(llm::LlmResponse{
             .content = "", .stop_reason = "end_turn", .input_tokens = 5, .output_tokens = 1}));
 
@@ -104,8 +104,9 @@ TEST(ReviewEngineTest, RunSystemPromptContainsAllActiveChecks) {
                 ::testing::HasSubstr("modernization")
             )
         ))
-    ).WillOnce(Return(llm::LlmResponse{
-        .content = "", .stop_reason = "end_turn", .input_tokens = 10, .output_tokens = 5}));
+    )
+        .WillOnce(Return(llm::LlmResponse{
+            .content = "", .stop_reason = "end_turn", .input_tokens = 10, .output_tokens = 5}));
 
     auto engine = ReviewEngine{std::move(mock), helpers::make_config()};
     ASSERT_TRUE(engine.run("int x;").has_value());
@@ -127,18 +128,17 @@ TEST(ReviewEngineTest, RunSystemPromptContainsOnlyEnabledChecks) {
                 ::testing::Not(::testing::HasSubstr("check categories: ub, modernization"))
             )
         ))
-    ).WillOnce(Return(llm::LlmResponse{
-        .content = "", .stop_reason = "end_turn", .input_tokens = 10, .output_tokens = 5}));
+    )
+        .WillOnce(Return(llm::LlmResponse{
+            .content = "", .stop_reason = "end_turn", .input_tokens = 10, .output_tokens = 5}));
 
-    auto engine = ReviewEngine{
-        std::move(mock), helpers::make_config({core::CheckCategory::ub})};
+    auto engine = ReviewEngine{std::move(mock), helpers::make_config({core::CheckCategory::ub})};
     ASSERT_TRUE(engine.run("int x;").has_value());
 }
 
 TEST(ReviewEngineTest, RunPropagatesLlmError) {
     auto mock = std::make_unique<MockLlmClient>();
-    EXPECT_CALL(*mock, complete(_))
-        .WillOnce(Return(std::unexpected{llm::LlmError::NetworkError}));
+    EXPECT_CALL(*mock, complete(_)).WillOnce(Return(std::unexpected{llm::LlmError::NetworkError}));
 
     auto engine = ReviewEngine{std::move(mock), helpers::make_config()};
     const auto result = engine.run("int main() {}");

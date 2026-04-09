@@ -109,7 +109,8 @@ send_request(IHttpClient& http_client, const std::string& body, const std::strin
 ClaudeLlmClient::ClaudeLlmClient(std::string api_key, std::string model)
     : api_key_{std::move(api_key)}
     , model_{std::move(model)}
-    , http_client_{std::make_unique<HttplibSslClient>(detail::api_host, 443, detail::request_timeout)} {}
+    , http_client_{
+          std::make_unique<HttplibSslClient>(detail::api_host, 443, detail::request_timeout)} {}
 
 ClaudeLlmClient::ClaudeLlmClient(
     std::string api_key, std::string model, std::unique_ptr<IHttpClient> http_client

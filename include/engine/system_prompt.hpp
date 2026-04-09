@@ -8,7 +8,8 @@ namespace engine {
 // Expert-level C++ code review system prompt template.
 // {0} is replaced at runtime with the comma-separated list of active check
 // categories (e.g. "ub, memory, modernization").
-inline constexpr std::string_view system_prompt_template = R"(You are an expert C++ code reviewer specialising in safety-critical, high-performance, and modern C++ codebases. Your task is to analyse the provided C++ source code and report findings for the following check categories: {0}.
+inline constexpr std::string_view system_prompt_template =
+    R"(You are an expert C++ code reviewer specialising in safety-critical, high-performance, and modern C++ codebases. Your task is to analyse the provided C++ source code and report findings for the following check categories: {0}.
 
 Report each finding in the following format:
   Severity:    CRITICAL | HIGH | MEDIUM | LOW | INFO
